@@ -121,4 +121,4 @@ If you use this data in your work, please cite:
 ```
 
 ## License
-The dataset is licenced under CC-by-NC, see the LICENSE file for details.
+The dataset is licenced under CC-BY-SA, see the LICENSE file for details.
