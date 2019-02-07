@@ -27,9 +27,16 @@ The Indic NLP Library and fairseq will be cloned automatically by the `prepare-*
 
 ### Download and preprocess data
 
-The `prepare-neen.sh` and `prepare-sien.sh` scripts can be used to preprocess the raw data. In particular, they will use
+The `prepare-data.sh` script can be used to download and extract the raw data. Also the `prepare-neen.sh` and `prepare-sien.sh` scripts can be used to preprocess the raw data. In particular, they will use
 the sentencepiece library to learn a shared BPE vocabulary with 5000 subword units and binarize the data for training
 with fairseq:
+
+To download and extract the raw data:
+```
+$ bash prepare-data.sh
+```
+
+Afterwards, run the following for preprocessing the raw data:
 ```
 $ bash prepare-neen.sh
 $ bash prepare-sien.sh
