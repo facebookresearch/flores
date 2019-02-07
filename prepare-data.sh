@@ -172,7 +172,7 @@ cat $NE_TAGGED/nepali-penn-treebank-patched.$SRC | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$SRC
 
 cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
-  perl -anpe "$PATCH_REGEX"  > $NE_ROOT/nepali-penn-treebank.$SRC
+  perl -anpe "$PATCH_REGEX"  > $NE_ROOT/nepali-penn-treebank.$NE_TGT
 
 rm -rf $MOSES $NE_TAGGED original.zip
 
