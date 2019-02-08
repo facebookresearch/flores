@@ -182,7 +182,6 @@ cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
 
 rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
 
-
-# Compress the final data
-tar -czf $DATA/all-clean.tgz $NE_ROOT $SI_ROOT
-rm -rf $NE_ROOT $SI_ROOT
+pushd data/
+tar -vxf wikipedia_en_ne_si_test_sets.tgz
+popd
