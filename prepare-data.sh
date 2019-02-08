@@ -6,6 +6,8 @@
 #
 #!/bin/bash
 
+# Downloads the data and creates data/all-clean.tgz within the current directory
+
 SRC=en
 SI_TGT=si
 NE_TGT=ne
@@ -15,7 +17,7 @@ DATA=$ROOT/data
 NE_ROOT=$ROOT/all-clean-ne
 SI_ROOT=$ROOT/all-clean-si
 
-mkdir -p $NE_ROOT $SI_ROOT
+mkdir -p $DATA $NE_ROOT $SI_ROOT
 
 SI_OPUS_DATASETS=(
   "$SI_ROOT/GNOME.en-si"
@@ -146,10 +148,15 @@ rm -rf bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP
 # Download and extract the Penn Treebank dataset
 NE_TAGGED=$ROOT/new_submissions_parallel_corpus_project_Nepal
 NE_TAGGED_URL="http://www.cle.org.pk/Downloads/ling_resources/parallelcorpus/NepaliTaggedCorpus.zip"
+EN_TAGGED_PATCH_URL="https://dl.fbaipublicfiles.com/fairseq/data/nepali-penn-treebank.en.patch"
+NE_TAGGED_PATCH_URL="https://dl.fbaipublicfiles.com/fairseq/data/nepali-penn-treebank.ne.patch"
 MOSES=$ROOT/mosesdecoder
 MOSES_TOK=$MOSES/scripts/tokenizer
-PATCH_REGEX="{s:\\\/:\/:g;s/\*\T\*\-\n+//g;s/\-LCB\-/\{/g;s/\-RCB\-/\}/g; s/\-LSB\-/\[/g; s/\-RSB\-/\]/g;s/\-LRB\-/\(/g; s/\-RRB\-/\)/g; s/\'\'/\"/g; s/\`\`/\"/g; s/\ +\'s\ +/\'s /g; s/\ +\'re\ +/\'re /g; s/\"\ +/\"/g; s/\ +\"/\"/g; s/\ n't([\ \.\"])/n't\1/g;}"
+EN_PATCH_REGEX="{s:\\\/:\/:g;s/\*\T\*\-\n+//g;s/\-LCB\-/\{/g;s/\-RCB\-/\}/g; s/\-LSB\-/\[/g; s/\-RSB\-/\]/g;s/\-LRB\-/\(/g; s/\-RRB\-/\)/g; s/\'\'/\"/g; s/\`\`/\"/g; s/\ +\'s\ +/\'s /g; s/\ +\'re\ +/\'re /g; s/\"\ +/\"/g; s/\ +\"/\"/g; s/\ n't([\ \.\"])/n't\1/g;}"
+NE_PATCH_REGEX="{s:\p{Cf}::g;s:\\\/:\/:g;s/\*\T\*\-\n+//g;s/\-LCB\-/\{/g;s/\-RCB\-/\}/g; s/\-LSB\-/\[/g; s/\-RSB\-/\]/g;s/\-LRB\-/\(/g; s/\-RRB\-/\)/g; s/\'\'/\"/g; s/\`\`/\"/g; s/\ +\'s\ +/\'s /g; s/\ +\'re\ +/\'re /g; s/\"\ +/\"/g; s/\ +\"/\"/g; s/\ n't([\ \.\"])/n't\1/g;}"
 
+download_data $DATA/nepali-penn-treebank.$SRC.patch $EN_TAGGED_PATCH_URL
+download_data $DATA/nepali-penn-treebank.$NE_TGT.patch $NE_TAGGED_PATCH_URL
 download_data original.zip $NE_TAGGED_URL
 unzip -o original.zip -d $ROOT
 
@@ -159,22 +166,21 @@ cat $NE_TAGGED/00ne_revised.txt $NE_TAGGED/01ne_revised.txt $NE_TAGGED/02ne_revi
 patch $NE_TAGGED/nepali-penn-treebank.$SRC -i $DATA/nepali-penn-treebank.$SRC.patch -o $NE_TAGGED/nepali-penn-treebank-patched.$SRC
 patch $NE_TAGGED/nepali-penn-treebank.$NE_TGT -i $DATA/nepali-penn-treebank.$NE_TGT.patch -o $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT
 
-
-
 if [ ! -e $MOSES ]; then
     echo "Cloning moses repository..."
     git clone https://github.com/moses-smt/mosesdecoder.git
 fi
 
 cat $NE_TAGGED/nepali-penn-treebank-patched.$SRC | \
-  perl -anpe "$PATCH_REGEX"  | \
+  perl -anpe "$EN_PATCH_REGEX"  | \
   $MOSES_TOK/tokenizer.perl -l $SRC | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$SRC
 
 cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
-  perl -anpe "$PATCH_REGEX"  > $NE_ROOT/nepali-penn-treebank.$NE_TGT
+  perl -CIO -anpe "$NE_PATCH_REGEX" |\
+  $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$NE_TGT
 
-rm -rf $MOSES $NE_TAGGED original.zip
+rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
 
 
 # Compress the final data
