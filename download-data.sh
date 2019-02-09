@@ -176,11 +176,12 @@ cat $NE_TAGGED/nepali-penn-treebank-patched.$SRC | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$SRC
 
 cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
-  perl -CIO -anpe "$NE_PATCH_REGEX" |\
+  perl -CIO -anpe "$NE_PATCH_REGEX" | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$NE_TGT
 
+download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
 rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
 
-pushd data/
+pushd $DATA/
 tar -vxf wikipedia_en_ne_si_test_sets.tgz
 popd

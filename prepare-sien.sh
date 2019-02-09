@@ -39,7 +39,7 @@ VALID_SET="wikipedia_en_ne_si_test_sets/wikipedia.dev.si-en"
 TEST_SET="wikipedia_en_ne_si_test_sets/wikipedia.devtest.si-en"
 
 if [ ! -d $DATA/all-clean-si ]; then
-    echo "Data directory not found. Please run 'bash prepare-data.sh' first..."
+    echo "Data directory not found. Please run 'bash download-data.sh' first..."
     exit -1
 fi
 
