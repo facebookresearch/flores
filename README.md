@@ -14,29 +14,31 @@ The following instructions will can be used to reproduce the baseline results fr
 
 The baseline uses the
 [Indic NLP Library](https://github.com/anoopkunchukuttan/indic_nlp_library) and
-[sentencepiece](https://github.com/google/sentencepiece) for preprocessing,
-[fairseq](https://github.com/pytorch/fairseq) for model training and
+[sentencepiece](https://github.com/google/sentencepiece) for preprocessing;
+[fairseq](https://github.com/pytorch/fairseq) for model training; and
 [sacrebleu](https://github.com/mjpost/sacreBLEU) for scoring.
 
-Sacrebleu and sentencepiece can be installed via pip:
+Dependencies can be installed via pip:
 ```
-$ pip install sacrebleu sentencepiece
+$ pip install fairseq sacrebleu sentencepiece
 ```
 
-The Indic NLP Library and fairseq will be cloned automatically by the `prepare-*.sh` scripts.
+The Indic NLP Library will be cloned automatically by the `prepare-{ne,si}en.sh` scripts.
 
 ### Download and preprocess data
 
-The `prepare-data.sh` script can be used to download and extract the raw data. Also the `prepare-neen.sh` and `prepare-sien.sh` scripts can be used to preprocess the raw data. In particular, they will use
-the sentencepiece library to learn a shared BPE vocabulary with 5000 subword units and binarize the data for training
-with fairseq:
+The `download-data.sh` script can be used to download and extract the raw data.
+Thereafter the `prepare-neen.sh` and `prepare-sien.sh` scripts can be used to
+preprocess the raw data. In particular, they will use the sentencepiece library
+to learn a shared BPE vocabulary with 5000 subword units and binarize the data
+for training with fairseq.
 
 To download and extract the raw data:
 ```
-$ bash prepare-data.sh
+$ bash download-data.sh
 ```
 
-Afterwards, run the following for preprocessing the raw data:
+Thereafter, run the following to preprocess the raw data:
 ```
 $ bash prepare-neen.sh
 $ bash prepare-sien.sh
@@ -46,7 +48,7 @@ $ bash prepare-sien.sh
 
 To train a baseline Ne-En model on a single GPU:
 ```
-$ CUDA_VISIBLE_DEVICES=0 python fairseq/train.py \
+$ CUDA_VISIBLE_DEVICES=0 fairseq-train \
     data-bin/wiki_ne_en_bpe5000/ \
     --source-lang ne --target-lang en \
     --arch transformer --share-all-embeddings \
@@ -66,29 +68,22 @@ $ CUDA_VISIBLE_DEVICES=0 python fairseq/train.py \
     --max-epoch 100 --save-interval 10
 ```
 
-To train on 4 GPUs, remove the `--update-freq` flag and run `CUDA_VISIBLE_DEVICES=0,1,2,3 python fairseq/train.py (...)`.
+To train on 4 GPUs, remove the `--update-freq` flag and run `CUDA_VISIBLE_DEVICES=0,1,2,3 fairseq-train (...)`.
 If you have a Volta or newer GPU you can further improve training speed by adding the `--fp16` flag.
 
 This same architecture can be used for En-Ne, Si-En and En-Si:
 - For En-Ne, update the training command with:  
-  `fairseq/train.py data-bin/wiki_ne_en_bpe5000 --source-lang en --target-lang ne`
+  `fairseq-train data-bin/wiki_ne_en_bpe5000 --source-lang en --target-lang ne`
 - For Si-En, update the training command with:  
-  `fairseq/train.py data-bin/wiki_si_en_bpe5000 --source-lang si --target-lang en`
+  `fairseq-train data-bin/wiki_si_en_bpe5000 --source-lang si --target-lang en`
 - For En-Si, update the training command with:  
-  `fairseq/train.py data-bin/wiki_si_en_bpe5000 --source-lang en --target-lang si`
+  `fairseq-train data-bin/wiki_si_en_bpe5000 --source-lang en --target-lang si`
 
 ### Compute BLEU using sacrebleu
 
-First we'll need to finish installation of fairseq:
+Run beam search generation and scoring with sacrebleu:
 ```
-$ cd fairseq
-$ python setup.py develop --user
-$ cd ..
-```
-
-Then run beam search generation and scoring with sacrebleu:
-```
-$ python fairseq/generate.py \
+$ fairseq-generate \
     data-bin/wiki_ne_en_bpe5000/ \
     --source-lang ne --target-lang en \
     --path checkpoints/checkpoint_best.pt \
@@ -105,7 +100,7 @@ Replace `--gen-subset valid` with `--gen-subset test` above to score the test se
 For these language pairs we report tokenized BLEU. You can compute tokenized BLEU by removing the `--sacrebleu` flag
 from generate.py:
 ```
-$ python fairseq/generate.py \
+$ fairseq-generate \
     data-bin/wiki_ne_en_bpe5000/ \
     --source-lang en --target-lang ne \
     --path checkpoints/checkpoint_best.pt \

@@ -46,12 +46,6 @@ if [ ! -d $DATA/all-clean-ne ]; then
     exit -1
 fi
 
-FAIRSEQ=fairseq
-if [ ! -e $FAIRSEQ ]; then
-    echo "Cloning fairseq repository..."
-    git clone https://github.com/pytorch/fairseq.git
-fi
-
 # download and extract data
 for ((i=0;i<${#URLS[@]};++i)); do
     ARCHIVE=$DATA/${ARCHIVES[i]}
@@ -67,7 +61,7 @@ for ((i=0;i<${#URLS[@]};++i)); do
             exit -1
         fi
     fi
-    FILE=${ARCHIVE:0:-4}
+    FILE=${ARCHIVE: -4}
     if [ -e $FILE ]; then
         echo "$FILE already exists, skipping extraction"
     else
@@ -113,7 +107,7 @@ for SPLIT in "valid" "test"; do \
 done
 
 # binarize data
-python $FAIRSEQ/preprocess.py \
+fairseq-preprocess \
   --source-lang $SRC --target-lang $TGT \
   --trainpref $TMP/train.bpe --validpref $TMP/valid.bpe --testpref $TMP/test.bpe \
   --destdir $DATABIN \

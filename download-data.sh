@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 #
 #!/bin/bash
-
 # Downloads the data and creates data/all-clean.tgz within the current directory
 
 SRC=en
@@ -54,7 +53,7 @@ download_data() {
     echo "$CORPORA already exists, skipping download"
   else
     echo "Downloading $URL"
-    curl -L $URL > $CORPORA
+    wget $URL -O $CORPORA
     if [ -f $CORPORA ]; then
       echo "$URL successfully downloaded."
     else
