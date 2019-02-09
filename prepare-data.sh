@@ -14,8 +14,8 @@ NE_TGT=ne
 
 ROOT=$(dirname "$0")
 DATA=$ROOT/data
-NE_ROOT=$ROOT/all-clean-ne
-SI_ROOT=$ROOT/all-clean-si
+NE_ROOT=$DATA/all-clean-ne
+SI_ROOT=$DATA/all-clean-si
 
 mkdir -p $DATA $NE_ROOT $SI_ROOT
 

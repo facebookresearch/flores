@@ -26,11 +26,9 @@ SPM_TRAIN=$SCRIPTS/spm_train.py
 SPM_ENCODE=$SCRIPTS/spm_encode.py
 
 URLS=(
-    "http://data.statmt.org/wmt19/parallel-corpus-filtering/all-clean.tgz"
     "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
 )
 ARCHIVES=(
-    "all-clean.tgz"
     "wikipedia_en_ne_si_test_sets.tgz"
 )
 TRAIN_SETS=(
@@ -42,6 +40,11 @@ TRAIN_SETS=(
 )
 VALID_SET="wikipedia_en_ne_si_test_sets/wikipedia.dev.ne-en"
 TEST_SET="wikipedia_en_ne_si_test_sets/wikipedia.devtest.ne-en"
+
+if [ ! -d $DATA/all-clean-ne ]; then
+    echo "Data directory not found. Please run 'bash prepare-data.sh' first..."
+    exit -1
+fi
 
 FAIRSEQ=fairseq
 if [ ! -e $FAIRSEQ ]; then
