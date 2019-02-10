@@ -94,8 +94,8 @@ download_opus_data() {
 }
 
 download_opus_data $SI_ROOT $SI_TGT
-mv ${SI_OPUS_DATASETS[3]}.$SRC $SI_ROOT/OpenSubtitles2018.$SRC
-mv ${SI_OPUS_DATASETS[3]}.$SI_TGT $SI_ROOT/OpenSubtitles2018.$SI_TGT
+mv ${SI_OPUS_DATASETS[3]}.$SRC $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SRC
+mv ${SI_OPUS_DATASETS[3]}.$SI_TGT $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SI_TGT
 
 download_opus_data $NE_ROOT $NE_TGT
 
