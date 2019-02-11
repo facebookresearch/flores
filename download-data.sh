@@ -20,7 +20,7 @@ NE_ROOT=$DATA/all-clean-ne
 SI_ROOT=$DATA/all-clean-si
 HI_ROOT=$DATA/all-clean-hi
 
-mkdir -p $DATA $NE_ROOT $SI_ROOT
+mkdir -p $DATA $NE_ROOT $SI_ROOT $HI_ROOT
 
 SI_OPUS_DATASETS=(
   "$SI_ROOT/GNOME.en-si"
@@ -48,6 +48,8 @@ NE_OPUS_URLS=(
   "https://object.pouta.csc.fi/OPUS-KDE4/v2/moses/en-ne.txt.zip"
 )
 
+REMOVE_FILE_PATHS=()
+
 # Download data
 download_data() {
   CORPORA=$1
@@ -57,11 +59,12 @@ download_data() {
     echo "$CORPORA already exists, skipping download"
   else
     echo "Downloading $URL"
-    wget $URL -O $CORPORA
+    wget $URL -O $CORPORA || rm -f $CORPORA
     if [ -f $CORPORA ]; then
       echo "$URL successfully downloaded."
     else
       echo "$URL not successfully downloaded."
+      rm -f $CORPORA
       exit -1
     fi
   fi
@@ -86,20 +89,24 @@ download_opus_data() {
     CORPORA=${DATASETS[i]}
 
     download_data $CORPORA $URL
-    unzip -o $CORPORA -d $LANG_ROOT || rm -f $CORPORA
-    rm -f $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE
+    unzip -o $CORPORA -d $LANG_ROOT
+    REMOVE_FILE_PATHS+=( $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE )
+    #rm -f $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE
   done
 
   cat ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC > $LANG_ROOT/GNOMEKDEUbuntu.$SRC-$TGT.$SRC
   cat ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT > $LANG_ROOT/GNOMEKDEUbuntu.$SRC-$TGT.$TGT
 
-  rm -f ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC
-  rm -f ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT
+  REMOVE_FILE_PATHS+=( ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC )
+  REMOVE_FILE_PATHS+=( ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT )
+  #rm -f ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC
+  #rm -f ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT
 }
 
 download_opus_data $SI_ROOT $SI_TGT
-mv ${SI_OPUS_DATASETS[3]}.$SRC $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SRC
-mv ${SI_OPUS_DATASETS[3]}.$SI_TGT $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SI_TGT
+cp ${SI_OPUS_DATASETS[3]}.$SRC $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SRC
+cp ${SI_OPUS_DATASETS[3]}.$SI_TGT $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SI_TGT
+REMOVE_FILE_PATHS+=( ${SI_OPUS_DATASETS[3]}.$SRC ${SI_OPUS_DATASETS[3]}.$SI_TGT )
 
 download_opus_data $NE_ROOT $NE_TGT
 
@@ -109,13 +116,13 @@ GLOBAL_VOICES="$NE_ROOT/globalvoices.2018q4.ne-en"
 GLOBAL_VOICES_URL="http://www.casmacat.eu/corpus/global-voices/globalvoices.ne-en.xliff.gz"
 
 download_data $GLOBAL_VOICES.gz $GLOBAL_VOICES_URL
-gunzip -N $GLOBAL_VOICES.gz
+gunzip -Nf $GLOBAL_VOICES.gz
 
 sed -ne 's?.*<source>\(.*\)</source>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$NE_TGT
 sed -ne 's?.*<target[^>]*>\(.*\)</target>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$SRC
 
-rm -f $GLOBAL_VOICES
-
+#rm -f $GLOBAL_VOICES
+REMOVE_FILE_PATHS+=( $GLOBAL_VOICES )
 
 # Download and extract the bible dataset
 BIBLE_TOOLS=$ROOT/bible-corpus-tools
@@ -145,14 +152,16 @@ cat $XML_BIBLES/aligned/*/English.txt > $NE_ROOT/bible.$SRC-$NE_TGT.$SRC
 cat $XML_BIBLES/aligned/*/Nepali.txt > $NE_ROOT/bible.$SRC-$NE_TGT.$NE_TGT
 cat $XML_BIBLES_DUP/aligned/*/English-WEB.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$SRC
 cat $XML_BIBLES_DUP/aligned/*/Nepali.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$NE_TGT
-rm -rf bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP
+REMOVE_FILE_PATHS+=( bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP )
+#rm -rf bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP
 
 
 # Download parallel en-hi corpus
 download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz"
 tar xvzf $DATA/en-hi.tgz
-mv parallel $HI_ROOT
-rm -rf $DATA/en-hi.tgz
+cp parallel/* $HI_ROOT/
+REMOVE_FILE_PATHS+=( parallel $DATA/en-hi.tgz )
+#rm -rf $DATA/en-hi.tgz parallel
 
 
 # Download and extract the Penn Treebank dataset
@@ -191,8 +200,15 @@ cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$NE_TGT
 
 download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
-rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
+REMOVE_FILE_PATHS+=( $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch )
+#rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
 
 pushd $DATA/
 tar -vxf wikipedia_en_ne_si_test_sets.tgz
 popd
+
+
+# Remove the temporary files
+for ((i=0;i<${#REMOVE_FILE_PATHS[@]};++i)); do
+  rm -rf ${REMOVE_FILE_PATHS[i]}
+done
