@@ -15,6 +15,7 @@ ROOT=$(dirname "$0")
 DATA=$ROOT/data
 NE_ROOT=$DATA/all-clean-ne
 SI_ROOT=$DATA/all-clean-si
+HI_ROOT=$DATA/all-clean-hi
 
 mkdir -p $DATA $NE_ROOT $SI_ROOT
 
@@ -142,6 +143,13 @@ cat $XML_BIBLES/aligned/*/Nepali.txt > $NE_ROOT/bible.$SRC-$NE_TGT.$NE_TGT
 cat $XML_BIBLES_DUP/aligned/*/English-WEB.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$SRC
 cat $XML_BIBLES_DUP/aligned/*/Nepali.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$NE_TGT
 rm -rf bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP
+
+
+# Download parallel en-hi corpus
+download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz"
+tar xvzf $DATA/en-hi.tgz
+mv parallel $HI_ROOT
+rm -rf $DATA/en-hi.tgz
 
 
 # Download and extract the Penn Treebank dataset
