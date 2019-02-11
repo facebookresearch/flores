@@ -7,6 +7,9 @@
 #!/bin/bash
 # Downloads the data and creates data/all-clean.tgz within the current directory
 
+set -e
+set -o pipefail
+
 SRC=en
 SI_TGT=si
 NE_TGT=ne
@@ -83,7 +86,7 @@ download_opus_data() {
     CORPORA=${DATASETS[i]}
 
     download_data $CORPORA $URL
-    unzip -o $CORPORA -d $LANG_ROOT
+    unzip -o $CORPORA -d $LANG_ROOT || rm -f $CORPORA
     rm -f $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE
   done
 
