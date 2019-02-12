@@ -91,7 +91,6 @@ download_opus_data() {
     download_data $CORPORA $URL
     unzip -o $CORPORA -d $LANG_ROOT
     REMOVE_FILE_PATHS+=( $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE )
-    #rm -f $CORPORA $CORPORA.xml $CORPORA.ids $LANG_ROOT/README $LANG_ROOT/LICENSE
   done
 
   cat ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC > $LANG_ROOT/GNOMEKDEUbuntu.$SRC-$TGT.$SRC
@@ -99,8 +98,6 @@ download_opus_data() {
 
   REMOVE_FILE_PATHS+=( ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC )
   REMOVE_FILE_PATHS+=( ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT )
-  #rm -f ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC
-  #rm -f ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT
 }
 
 download_opus_data $SI_ROOT $SI_TGT
@@ -121,7 +118,6 @@ gunzip -Nf $GLOBAL_VOICES.gz
 sed -ne 's?.*<source>\(.*\)</source>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$NE_TGT
 sed -ne 's?.*<target[^>]*>\(.*\)</target>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$SRC
 
-#rm -f $GLOBAL_VOICES
 REMOVE_FILE_PATHS+=( $GLOBAL_VOICES )
 
 # Download and extract the bible dataset
@@ -153,7 +149,6 @@ cat $XML_BIBLES/aligned/*/Nepali.txt > $NE_ROOT/bible.$SRC-$NE_TGT.$NE_TGT
 cat $XML_BIBLES_DUP/aligned/*/English-WEB.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$SRC
 cat $XML_BIBLES_DUP/aligned/*/Nepali.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$NE_TGT
 REMOVE_FILE_PATHS+=( bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP )
-#rm -rf bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP
 
 
 # Download parallel en-hi corpus
@@ -161,7 +156,6 @@ download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_co
 tar xvzf $DATA/en-hi.tgz
 cp parallel/* $HI_ROOT/
 REMOVE_FILE_PATHS+=( parallel $DATA/en-hi.tgz )
-#rm -rf $DATA/en-hi.tgz parallel
 
 
 # Download and extract the Penn Treebank dataset
@@ -199,9 +193,18 @@ cat $NE_TAGGED/nepali-penn-treebank-patched.$NE_TGT | \
   perl -CIO -anpe "$NE_PATCH_REGEX" | \
   $MOSES_TOK/detokenizer.perl -l $SRC > $NE_ROOT/nepali-penn-treebank.$NE_TGT
 
+
+# Download nepali dictionary data
+NE_DICT=$NE_ROOT/dictionaries
+download_data $NE_DICT "http://www.seas.upenn.edu/~nlp/resources/TACL-data-release/dictionaries.tar.gz"
+tar xvzf $NE_DICT
+cp dictionaries/dict.ne $NE_ROOT/dictionary.$NE_TGT-$SRC
+REMOVE_FILE_PATHS+=( $NE_DICT dictionaries )
+
+
+# Download test sets
 download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
 REMOVE_FILE_PATHS+=( $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch )
-#rm -rf $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch
 
 pushd $DATA/
 tar -vxf wikipedia_en_ne_si_test_sets.tgz
