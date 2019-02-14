@@ -6,18 +6,12 @@
 #
 #!/bin/bash
 
-if [ $# -ne 2 ]; then
-    echo "usage: $0 LANGUAGE INFILE"
-    exit 1
-fi
-LANG=$1
-INFILE=$2
-
 ROOT=$(dirname "$0")
 
 INDICNLP=$ROOT/indic_nlp_library
 if [ ! -e $INDICNLP ]; then
-    exit 1
+    echo "Cloning Indic NLP Library..."
+    git -C $ROOT clone https://github.com/anoopkunchukuttan/indic_nlp_library.git
+else
+    echo "Indic is already pulled from github. Skipping."
 fi
-
-python2 $ROOT/indic_norm_tok.py --indic-nlp-path $INDICNLP --language $LANG $INFILE

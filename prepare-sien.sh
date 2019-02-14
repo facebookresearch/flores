@@ -67,6 +67,7 @@ for ((i=0;i<${#URLS[@]};++i)); do
 done
 
 echo "pre-processing train data..."
+bash $SCRIPTS/download_indic.sh
 for FILE in "${TRAIN_SETS[@]}" ; do
     $SRC_TOKENIZER $DATA/$FILE.$SRC
 done > $TMP/train.$SRC
