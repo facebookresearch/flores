@@ -20,13 +20,6 @@ def main():
                         help="path to Indic NLP Library root")
     parser.add_argument("--language", required=True)
     parser.add_argument("--remove-nuktas", default=False, action="store_true")
-    parser.add_argument("--nasals-mode", default="do_nothing",
-                        choices=[
-                            "do_nothing",
-                            "to_anusvaara_strict",
-                            "to_anusvaara_relaxed",
-                            "to_nasal_consonants",
-                        ])
     parser.add_argument("input", help="input file; use - for stdin")
     args = parser.parse_args()
 
@@ -45,7 +38,7 @@ def main():
     # create normalizer
     factory = IndicNormalizerFactory()
     normalizer = factory.get_normalizer(
-        args.language, remove_nuktas=args.remove_nuktas, nasals_mode=args.nasals_mode,
+        args.language, remove_nuktas=args.remove_nuktas,
     )
 
     # normalize and tokenize
