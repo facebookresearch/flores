@@ -56,11 +56,11 @@ def main():
 
     with contextlib.ExitStack() as stack:
         inputs = [
-            stack.enter_context(open(input, "r", encoding="utf-8"))
+            stack.enter_context(open(input, "r", encoding="utf-8", newline="\n"))
             for input in args.inputs
         ]
         outputs = [
-            stack.enter_context(open(output, "w", encoding="utf-8"))
+            stack.enter_context(open(output, "w", encoding="utf-8", newline="\n"))
             for output in args.outputs
         ]
 
