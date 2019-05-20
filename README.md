@@ -123,10 +123,10 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
-2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
-2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
-2019-03-08: Update tokenizer script to make it compatible with previous version of indic_nlp.
-2019-02-14: Update dataset preparation script to avoid unexpected extra line being added to each paralel dataset.
+- 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
+- 2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
+- 2019-03-08: Update tokenizer script to make it compatible with previous version of indic_nlp.
+- 2019-02-14: Update dataset preparation script to avoid unexpected extra line being added to each paralel dataset.
 
 
 ## License
