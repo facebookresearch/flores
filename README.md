@@ -1,4 +1,4 @@
-# Facebook Low Resource (FLoRes) MT Benchmark
+# FLoRes Low Resource MT Benchmark
 
 This repository contains data and baselines from the paper:  
 [Two New Evaluation Data-Sets for Low-Resource Machine Translation: Nepali–English and Sinhala–English](https://arxiv.org/abs/1902.01382).
