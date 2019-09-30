@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import argparse
 import contextlib
+import sys
 
 import sentencepiece as spm
 
@@ -18,9 +19,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True,
                         help="sentencepiece model to use for encoding")
-    parser.add_argument("--inputs", nargs="+", required=True,
+    parser.add_argument("--inputs", nargs="+", default=['-'],
                         help="input files to filter/encode")
-    parser.add_argument("--outputs", nargs="+", required=True,
+    parser.add_argument("--outputs", nargs="+", default=['-'],
                         help="path to save encoded outputs")
     parser.add_argument("--output_format", choices=["piece", "id"], default="piece")
     parser.add_argument("--min-len", type=int, metavar="N",
@@ -56,11 +57,13 @@ def main():
 
     with contextlib.ExitStack() as stack:
         inputs = [
-            stack.enter_context(open(input, "r", encoding="utf-8", newline="\n"))
+            stack.enter_context(open(input, "r", encoding="utf-8", newline="\n", errors="ignore"))
+                if input != "-" else sys.stdin
             for input in args.inputs
         ]
         outputs = [
             stack.enter_context(open(output, "w", encoding="utf-8", newline="\n"))
+                if output != "-" else sys.stdout
             for output in args.outputs
         ]
 
@@ -87,10 +90,10 @@ def main():
                 for enc_line, output_h in zip(enc_lines, outputs):
                     print(" ".join(enc_line), file=output_h)
             if i % 10000 == 0:
-                print("processed {} lines".format(i))
+                print("processed {} lines".format(i), file=sys.stderr)
 
-        print("skipped {} empty lines".format(stats["num_empty"]))
-        print("filtered {} lines".format(stats["num_filtered"]))
+        print("skipped {} empty lines".format(stats["num_empty"]), file=sys.stderr)
+        print("filtered {} lines".format(stats["num_filtered"]), file=sys.stderr)
 
 
 if __name__ == "__main__":
