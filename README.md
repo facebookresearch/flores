@@ -137,7 +137,7 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
-- 2019-10-xx: Add script to reproduce iterative back-translation result on Ne-En
+- 2019-10-23: Add script to reproduce iterative back-translation result on Nepali-English and English-Nepali
 - 2019-10-18: Add final test set
 - 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
 - 2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
