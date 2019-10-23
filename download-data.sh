@@ -59,7 +59,7 @@ download_data() {
     echo "$CORPORA already exists, skipping download"
   else
     echo "Downloading $URL"
-    wget $URL -O $CORPORA || rm -f $CORPORA
+    wget $URL -O $CORPORA --no-check-certificate || rm -f $CORPORA
     if [ -f $CORPORA ]; then
       echo "$URL successfully downloaded."
     else
@@ -152,7 +152,8 @@ REMOVE_FILE_PATHS+=( bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $X
 
 
 # Download parallel en-hi corpus
-download_data $DATA/en-hi.tgz "https://www.cse.iitb.ac.in/~anoopk/share/iitb_en_hi_parallel/iitb_corpus_download/parallel.tgz"
+download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz"
+#download_data $DATA/en-hi.tgz "https://www.cse.iitb.ac.in/~anoopk/share/iitb_en_hi_parallel/iitb_corpus_download/parallel.tgz"
 tar xvzf $DATA/en-hi.tgz
 cp parallel/* $HI_ROOT/
 REMOVE_FILE_PATHS+=( parallel $DATA/en-hi.tgz )

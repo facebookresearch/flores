@@ -109,6 +109,20 @@ $ fairseq-generate \
     --remove-bpe=sentencepiece
 ```
 
+### Train iterative back-translation models
+
+After runing the commands in *Download and preprocess data* section above, run the following to download and preprocess the monolingual data:
+```
+$ bash prepare-monolingaul.sh
+```
+
+To train the iterative back-translation for two iterations on Ne-En, run the following:
+```
+$ bash reproduce.sh ne_en
+```
+
+The script will train an Ne-En supervised model, translate Nepali monolingual data, train En-Ne back-translation iteration 1 model, translate English monolingual data back to Nepali, and train Ne-En back-translation iteration 2 model. All the model training and data generation happen locally. The script uses all the GPUs unless certain cuda device ids are specified to `train.py`, and it is designed to adjust the hyper-parameters according to the number of available GPUs.  With 8 Tesla V100 GPUs, the full pipeline takes about 25 hours to finish. We expect the final BT iteration 2 Ne-En model achieves around 15.9 (sacre)BLEU score on devtest set. The script supports `ne_en` and `en_ne` directions.
+
 ## Citation
 
 If you use this data in your work, please cite:
@@ -123,6 +137,8 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
+- 2019-10-xx: Add script to reproduce iterative back-translation result on Ne-En
+- 2019-10-18: Add final test set
 - 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
 - 2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
 - 2019-03-08: Update tokenizer script to make it compatible with previous version of indic_nlp.
