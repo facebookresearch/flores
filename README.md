@@ -1,7 +1,7 @@
 # FLoRes Low Resource MT Benchmark
 
 This repository contains data and baselines from the paper:  
-[Two New Evaluation Data-Sets for Low-Resource Machine Translation: Nepali–English and Sinhala–English](https://arxiv.org/abs/1902.01382).
+[The FLoRes Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English](https://arxiv.org/abs/1902.01382).
 
 The data can be downloaded directly at:  
 https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz
