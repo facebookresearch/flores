@@ -113,7 +113,7 @@ $ fairseq-generate \
 
 After runing the commands in *Download and preprocess data* section above, run the following to download and preprocess the monolingual data:
 ```
-$ bash prepare-monolingaul.sh
+$ bash prepare-monolingual.sh
 ```
 
 To train the iterative back-translation for two iterations on Ne-En, run the following:
@@ -121,7 +121,7 @@ To train the iterative back-translation for two iterations on Ne-En, run the fol
 $ bash reproduce.sh ne_en
 ```
 
-The script will train an Ne-En supervised model, translate Nepali monolingual data, train En-Ne back-translation iteration 1 model, translate English monolingual data back to Nepali, and train Ne-En back-translation iteration 2 model. All the model training and data generation happen locally. The script uses all the GPUs unless certain cuda device ids are specified to `train.py`, and it is designed to adjust the hyper-parameters according to the number of available GPUs.  With 8 Tesla V100 GPUs, the full pipeline takes about 25 hours to finish. We expect the final BT iteration 2 Ne-En model achieves around 15.9 (sacre)BLEU score on devtest set. The script supports `ne_en` and `en_ne` directions.
+The script will train an Ne-En supervised model, translate Nepali monolingual data, train En-Ne back-translation iteration 1 model, translate English monolingual data back to Nepali, and train Ne-En back-translation iteration 2 model. All the model training and data generation happen locally. The script uses all the GPUs listed in `CUDA_VISIBLE_DEVICES` variable unless certain cuda device ids are specified to `train.py`, and it is designed to adjust the hyper-parameters according to the number of available GPUs.  With 8 Tesla V100 GPUs, the full pipeline takes about 25 hours to finish. We expect the final BT iteration 2 Ne-En model achieves around 15.9 (sacre)BLEU score on devtest set. The script supports `ne_en`, `en_ne`, `si_en` and `en_si` directions.
 
 ## Citation
 
@@ -137,6 +137,7 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
+- 2019-11-04: Add config to reproduce iterative back-translation result on Sinhala-English and English-Sinhala
 - 2019-10-23: Add script to reproduce iterative back-translation result on Nepali-English and English-Nepali
 - 2019-10-18: Add final test set
 - 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
