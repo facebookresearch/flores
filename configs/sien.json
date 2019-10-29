@@ -1,0 +1,159 @@
+[
+  [
+    "sup",
+    {
+      "src": "si",
+      "tgt": "en",
+      "train": {
+        "parameters": [
+          "--fp16",
+          "--ddp-backend no_c10d",
+          "--arch transformer",
+          "--share-all-embeddings",
+          "--encoder-layers 5",
+          "--decoder-layers 5",
+          "--encoder-embed-dim 512",
+          "--decoder-embed-dim 512",
+          "--encoder-ffn-embed-dim 2048",
+          "--decoder-ffn-embed-dim 2048",
+          "--encoder-attention-heads 8",
+          "--decoder-attention-heads 8",
+          "--encoder-normalize-before",
+          "--decoder-normalize-before",
+          "--attention-dropout 0.3",
+          "--relu-dropout 0.3",
+          "--optimizer adam",
+          "--adam-betas \"(0.9, 0.98)\"",
+          "--lr-scheduler inverse_sqrt",
+          "--warmup-init-lr 1e-7",
+          "--warmup-updates 4000",
+          "--lr 0.003",
+          "--min-lr 1e-9",
+          "--clip-norm 0.0",
+          "--dropout 0.3",
+          "--criterion label_smoothed_cross_entropy",
+          "--label-smoothing 0.2",
+          "--max-tokens 4000",
+          "--seed 1",
+          "--log-format json",
+          "--log-interval 100",
+          "--max-epoch 100",
+          "--save-interval 1",
+          "--no-epoch-checkpoints"
+        ],
+        "gpu": 4
+      },
+      "translate": {
+        "lenpen": 1.5,
+        "max_token": 30000,
+        "mono": "data/mono/sien/mono.bpe.si"
+      }
+    }
+  ],
+  [
+    "bt_iter1",
+    {
+      "src": "en",
+      "tgt": "si",
+      "train": {
+        "parameters": [
+          "--fp16",
+          "--ddp-backend no_c10d",
+          "--arch transformer",
+          "--share-all-embeddings",
+          "--encoder-layers 6",
+          "--decoder-layers 6",
+          "--encoder-embed-dim 1024",
+          "--decoder-embed-dim 1024",
+          "--encoder-ffn-embed-dim 4096",
+          "--decoder-ffn-embed-dim 4096",
+          "--encoder-attention-heads 4",
+          "--decoder-attention-heads 4",
+          "--encoder-normalize-before",
+          "--decoder-normalize-before",
+          "--attention-dropout 0.2",
+          "--relu-dropout 0.2",
+          "--optimizer adam",
+          "--adam-betas \"(0.9, 0.98)\"",
+          "--lr-scheduler inverse_sqrt",
+          "--warmup-init-lr 1e-7",
+          "--warmup-updates 4000",
+          "--lr 0.0007",
+          "--min-lr 1e-9",
+          "--clip-norm 0.0",
+          "--dropout 0.2",
+          "--criterion label_smoothed_cross_entropy",
+          "--label-smoothing 0.2",
+          "--upsample-primary 7",
+          "--max-tokens 4000",
+          "--seed 1",
+          "--log-format json",
+          "--log-interval 100",
+          "--max-update 90000",
+          "--save-interval-updates 2000",
+          "--keep-interval-updates 1",
+          "--no-epoch-checkpoints"
+        ],
+        "gpu": 8
+      },
+      "translate": {
+        "lenpen": 0.6,
+        "max_token": 16000,
+        "mono": "data/mono/sien/mono.bpe.en"
+      }
+    }
+  ],
+  [
+    "bt_iter2",
+    {
+      "src": "si",
+      "tgt": "en",
+      "train": {
+        "parameters": [
+          "--fp16",
+          "--ddp-backend no_c10d",
+          "--arch transformer",
+          "--share-all-embeddings",
+          "--encoder-layers 6",
+          "--decoder-layers 6",
+          "--encoder-embed-dim 1024",
+          "--decoder-embed-dim 1024",
+          "--encoder-ffn-embed-dim 4096",
+          "--decoder-ffn-embed-dim 4096",
+          "--encoder-attention-heads 16",
+          "--decoder-attention-heads 16",
+          "--encoder-normalize-before",
+          "--decoder-normalize-before",
+          "--attention-dropout 0.1",
+          "--relu-dropout 0.1",
+          "--optimizer adam",
+          "--adam-betas \"(0.9, 0.98)\"",
+          "--lr-scheduler inverse_sqrt",
+          "--warmup-init-lr 1e-7",
+          "--warmup-updates 4000",
+          "--lr 0.001",
+          "--min-lr 1e-9",
+          "--clip-norm 0.0",
+          "--dropout 0.1",
+          "--criterion label_smoothed_cross_entropy",
+          "--label-smoothing 0.2",
+          "--upsample-primary 1",
+          "--max-tokens 4000",
+          "--seed 1",
+          "--log-format json",
+          "--log-interval 100",
+          "--max-update 120000",
+          "--save-interval-updates 2000",
+          "--keep-interval-updates 1",
+          "--no-epoch-checkpoints"
+        ],
+        "gpu": 8
+      },
+      "translate": {
+        "lenpen": 0.8,
+        "max_token": 16000,
+        "mono": "data/mono/sien/mono.bpe.si"
+      }
+    }
+  ]
+]
