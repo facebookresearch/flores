@@ -113,7 +113,7 @@ $ fairseq-generate \
 
 After runing the commands in *Download and preprocess data* section above, run the following to download and preprocess the monolingual data:
 ```
-$ bash prepare-monolingaul.sh
+$ bash prepare-monolingual.sh
 ```
 
 To train the iterative back-translation for two iterations on Ne-En, run the following:
