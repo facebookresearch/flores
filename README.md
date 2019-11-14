@@ -61,7 +61,7 @@ $ CUDA_VISIBLE_DEVICES=0 fairseq-train \
     --weight-decay 0.0001 \
     --label-smoothing 0.2 --criterion label_smoothed_cross_entropy \
     --optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0 \
-    --lr-scheduler inverse_sqrt --warmup-update 4000 --warmup-init-lr 1e-7 \
+    --lr-scheduler inverse_sqrt --warmup-updates 4000 --warmup-init-lr 1e-7 \
     --lr 1e-3 --min-lr 1e-9 \
     --max-tokens 4000 \
     --update-freq 4 \
