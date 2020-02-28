@@ -93,7 +93,8 @@ $ fairseq-generate \
     --sacrebleu
 ```
 
-Replace `--gen-subset valid` with `--gen-subset test` above to score the test set.
+Note that the `--gen-subset valid` set is the FloRes **dev** set and `--gen-subset test` set is the FloRes **devtest** set.
+Replace `--gen-subset valid` with `--gen-subset test` above to score the FLoRes **devtest** set which is corresponding to the reported number in our paper.
 
 **Tokenized BLEU for En-Ne and En-Si:**
 
