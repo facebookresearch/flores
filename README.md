@@ -1,10 +1,10 @@
-# FLoRes Low Resource MT Benchmark
+# <img src="flores_logo.png" width="30"> FLoRes Low Resource MT Benchmark
 
 This repository contains data and baselines from the paper:  
 [The FLoRes Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English](https://arxiv.org/abs/1902.01382).
 
-The data can be downloaded directly at:  
-https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz
+The data can be downloaded directly at:
+https://github.com/facebookresearch/flores/raw/master/data/flores_test_sets.tgz
 
 ## Baselines
 
@@ -138,9 +138,10 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
-- 2019-11-04: Add config to reproduce iterative back-translation result on Sinhala-English and English-Sinhala
-- 2019-10-23: Add script to reproduce iterative back-translation result on Nepali-English and English-Nepali
-- 2019-10-18: Add final test set
+- 2020-04-02: Add two new langauge pairs, Khmer-English, Pashto-English.
+- 2019-11-04: Add config to reproduce iterative back-translation result on Sinhala-English and English-Sinhala.
+- 2019-10-23: Add script to reproduce iterative back-translation result on Nepali-English and English-Nepali.
+- 2019-10-18: Add final test set.
 - 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
 - 2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
 - 2019-03-08: Update tokenizer script to make it compatible with previous version of indic_nlp.
