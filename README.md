@@ -1,4 +1,4 @@
-# <img src="flores_logo.png" width="30"> FLoRes Low Resource MT Benchmark
+# <img src="flores_logo.png" width="300"> FLoRes Low Resource MT Benchmark
 
 This repository contains data and baselines from the paper:  
 [The FLoRes Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English](https://arxiv.org/abs/1902.01382).
