@@ -1,10 +1,17 @@
-# <img src="flores_logo.png" width="300"> FLoRes Low Resource MT Benchmark
+<p align="center">
+<img src="flores_logo.png" width="500">
+</p>
+
+--------------------------------------------------------------------------------
+
+# Facebook Low Resource MT Benchmark (FLoRes)
+FLoRes is a benchmark dataset for machine translation between English and four low resource languages, Nepali, Sinhala, Khmer and Pashto, based on sentences translated from Wikipedia.
+The data sets can be downloaded [HERE](https://github.com/facebookresearch/flores/raw/master/data/flores_test_sets.tgz).
+
+**New**: two new languages, Khmer and Pashto, are added to the dataset.
 
 This repository contains data and baselines from the paper:  
 [The FLoRes Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English](https://arxiv.org/abs/1902.01382).
-
-The data can be downloaded directly at:
-https://github.com/facebookresearch/flores/raw/master/data/flores_test_sets.tgz
 
 ## Baselines
 
