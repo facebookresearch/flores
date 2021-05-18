@@ -116,9 +116,6 @@ class Handler(BaseDynaHandler):
         translation = self.vocab.string(inference_output, "sentencepiece")
         response = {
             "id": example["uid"],
-            "sourceLanguage": example["sourceLanguage"],
-            "sourceText": example["sourceText"],
-            "targetLanguage": example["targetLanguage"],
             "translatedText": translation,
         }
 
