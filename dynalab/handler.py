@@ -31,12 +31,15 @@ class Handler(BaseDynaHandler):
     and extract the files next to this one.
     Notably there should be a "dict.txt" and a "sentencepiece.bpe.model".
     """
+
     def initialize(self, context):
         """
         load model and extra files.
         """
         model_pt_path, model_file_dir, device = self._handler_initialize(context)
-        config = json.loads((Path(model_file_dir) / "model_generation.json").read_text())
+        config = json.loads(
+            (Path(model_file_dir) / "model_generation.json").read_text()
+        )
 
         translation_cfg = TranslationConfig()
         self.vocab = TranslationTask.load_dictionary("dict.txt")
@@ -84,24 +87,27 @@ class Handler(BaseDynaHandler):
         # TODO: this doesn't seem to produce good results. wrong EOS / BOS ?
         sample = self._read_data(data)
         tokens = self.tokenize(sample["sourceText"])
+        src_token = self.lang_token(sample["sourceLanguage"])
         sample["net_input"] = {
-            "src_tokens": torch.tensor(
-                [tokens + [self.lang_token(sample["sourceLanguage"])]]
-            ),
-            "src_lengths": torch.tensor([len(tokens)]),
+            "src_tokens": torch.tensor([[src_token] + tokens + [self.vocab.eos()]]),
+            "src_lengths": torch.tensor([len(tokens) + 2]),
         }
-        sample["tgt_lang"] = self.lang_token(sample["targetLanguage"])
+        tgt_token = self.lang_token(sample["targetLanguage"])
+        sample["prefix_tokens"] = torch.tensor([[tgt_token]])
         return sample
 
     @torch.no_grad()
     def inference(self, input_data: dict) -> list:
         generated = self.sequence_generator.generate(
-            models=[], sample=input_data, bos_token=input_data["tgt_lang"]
+            models=[],
+            sample=input_data,
+            prefix_tokens=input_data["prefix_tokens"],
         )
         # `generate` returns a list of samples
         # with several hypothesis per sample
-        # and a dict per hypothesis
-        return generated[0][0]["tokens"]
+        # and a dict per hypothesis.
+        # We also need to strip the language token.
+        return generated[0][0]["tokens"][1:]
 
     def postprocess(self, inference_output, data):
         """
