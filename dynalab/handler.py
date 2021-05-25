@@ -1,21 +1,26 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 
-import torch
+import json
+import logging
+from pathlib import Path
 
 import fairseq.checkpoint_utils
 import sentencepiece
-import json
-from pathlib import Path
+import torch
 from dynalab.handler.base_handler import BaseDynaHandler
 from dynalab.tasks.flores_small1 import TaskIO
 from fairseq.sequence_generator import SequenceGenerator
 from fairseq.tasks.translation import TranslationConfig, TranslationTask
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 class FakeGenerator:
     """Fake sequence generator, that returns the input."""
 
-    def generate(self, models, sample, bos_token):
+    def generate(self, models, sample, prefix_tokens=None):
         return [[{"tokens": sample["net_input"]["src_tokens"][:-1]}]]
 
 
@@ -36,6 +41,7 @@ class Handler(BaseDynaHandler):
         """
         load model and extra files.
         """
+        logger.info(f"Will initialize with system_properties: {context.system_properties}")
         model_pt_path, model_file_dir, device = self._handler_initialize(context)
         config = json.loads(
             (Path(model_file_dir) / "model_generation.json").read_text()
@@ -46,16 +52,20 @@ class Handler(BaseDynaHandler):
 
         self.spm = sentencepiece.SentencePieceProcessor()
         self.spm.Load("sentencepiece.bpe.model")
+        logger.info("Loaded sentencepiece.bpe.model")
 
         if config.get("dummy", False):
             self.sequence_generator = FakeGenerator()
+            logger.warning("Will use a FakeGenerator model, only testing BPE")
         else:
             task = TranslationTask(translation_cfg, self.vocab, self.vocab)
             [model], cfg = fairseq.checkpoint_utils.load_model_ensemble(
                 [model_pt_path], task=task
             )
+            device = "gpu:0"
             model.eval().to(device)
-
+            logger.info(f"Loaded model from {model_pt_path} to device {device}")
+            logger.info(f"Will use the following config: {json.dumps(config, indent=4)}")
             self.sequence_generator = SequenceGenerator(
                 [model],
                 tgt_dict=self.vocab,
@@ -144,3 +154,12 @@ def handle(data, context):
     response = _service.postprocess(output, data)
 
     return response
+
+
+if __name__ == '__main__':
+    from dynalab.tasks.flores_small1 import data as flores_data
+    context = {
+
+    }
+
+    handle(flores_data, context)
