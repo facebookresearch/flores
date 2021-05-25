@@ -7,11 +7,12 @@ from pathlib import Path
 import fairseq.checkpoint_utils
 import sentencepiece
 import torch
+from typing import NamedTuple
 from dynalab.handler.base_handler import BaseDynaHandler
 from dynalab.tasks.flores_small1 import TaskIO
 from fairseq.sequence_generator import SequenceGenerator
 from fairseq.tasks.translation import TranslationConfig, TranslationTask
-
+from fairseq.data import data_utils
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -41,11 +42,14 @@ class Handler(BaseDynaHandler):
         """
         load model and extra files.
         """
-        logger.info(f"Will initialize with system_properties: {context.system_properties}")
+        logger.info(
+            f"Will initialize with system_properties: {context.system_properties}"
+        )
         model_pt_path, model_file_dir, device = self._handler_initialize(context)
         config = json.loads(
             (Path(model_file_dir) / "model_generation.json").read_text()
         )
+        self.device = device
 
         translation_cfg = TranslationConfig()
         self.vocab = TranslationTask.load_dictionary("dict.txt")
@@ -62,10 +66,11 @@ class Handler(BaseDynaHandler):
             [model], cfg = fairseq.checkpoint_utils.load_model_ensemble(
                 [model_pt_path], task=task
             )
-            device = "gpu:0"
-            model.eval().to(device)
-            logger.info(f"Loaded model from {model_pt_path} to device {device}")
-            logger.info(f"Will use the following config: {json.dumps(config, indent=4)}")
+            model.eval().to(self.device)
+            logger.info(f"Loaded model from {model_pt_path} to device {self.device}")
+            logger.info(
+                f"Will use the following config: {json.dumps(config, indent=4)}"
+            )
             self.sequence_generator = SequenceGenerator(
                 [model],
                 tgt_dict=self.vocab,
@@ -90,21 +95,39 @@ class Handler(BaseDynaHandler):
         tokens = [self.vocab.index(word) for word in words]
         return tokens
 
-    def preprocess(self, data):
+    def preprocess_one(self, sample):
         """
         preprocess data into a format that the model can do inference on
         """
         # TODO: this doesn't seem to produce good results. wrong EOS / BOS ?
-        sample = self._read_data(data)
         tokens = self.tokenize(sample["sourceText"])
         src_token = self.lang_token(sample["sourceLanguage"])
-        sample["net_input"] = {
-            "src_tokens": torch.tensor([[src_token] + tokens + [self.vocab.eos()]]),
-            "src_lengths": torch.tensor([len(tokens) + 2]),
-        }
         tgt_token = self.lang_token(sample["targetLanguage"])
-        sample["prefix_tokens"] = torch.tensor([[tgt_token]])
+        return {
+            "src_tokens": [src_token] + tokens + [self.vocab.eos()],
+            "src_length": len(tokens) + 1,
+            "tgt_token": tgt_token,
+        }
         return sample
+
+    def preprocess(self, data):
+        samples = [self.preprocess_one(s["body"]) for s in data]
+        prefix_tokens = torch.tensor([[s["tgt_token"]] for s in samples])
+        src_lengths = torch.tensor([s["src_length"] for s in samples])
+        src_tokens = data_utils.collate_tokens(
+            [torch.tensor(s["src_tokens"]) for s in samples],
+            self.vocab.pad(),
+            self.vocab.eos(),
+        )
+        return {
+            "nsentences": len(samples),
+            "ntokens": src_lengths.sum().item(),
+            "net_input": {
+                "src_tokens": src_tokens.to(self.device),
+                "src_lengths": src_lengths.to(self.device),
+            },
+            "prefix_tokens": prefix_tokens.to(self.device),
+        }
 
     @torch.no_grad()
     def inference(self, input_data: dict) -> list:
@@ -117,27 +140,28 @@ class Handler(BaseDynaHandler):
         # with several hypothesis per sample
         # and a dict per hypothesis.
         # We also need to strip the language token.
-        return generated[0][0]["tokens"][1:]
+        return [hypos[0]["tokens"][1:] for hypos in generated]
 
     def postprocess(self, inference_output, data):
         """
         post process inference output into a response.
-        response should be a single element list of a json
+        response should be a list of json
         the response format will need to pass the validation in
         ```
         dynalab.tasks.flores_small1.TaskIO().verify_response(response)
         ```
         """
-        example = self._read_data(data)
-        translation = self.vocab.string(inference_output, "sentencepiece")
-        response = {
-            "id": example["uid"],
-            "translatedText": translation,
-        }
-
-        # Required by dynabench, don't remove.
-        response = self.taskIO.sign_response(response, example)
-        return [response]
+        translations = [
+            self.vocab.string(tokens, "sentencepiece") for tokens in inference_output
+        ]
+        return [
+            # Signing required by dynabench, don't remove.
+            self.taskIO.sign_response(
+                {"id": sample["body"]["uid"], "translatedText": translation},
+                sample["body"],
+            )
+            for translation, sample in zip(translations, data)
+        ]
 
 
 _service = Handler()
@@ -156,10 +180,22 @@ def handle(data, context):
     return response
 
 
-if __name__ == '__main__':
-    from dynalab.tasks.flores_small1 import data as flores_data
-    context = {
+if __name__ == "__main__":
+    from dynalab.tasks import flores_small1
 
-    }
+    # TODO: check that the data received from sagemaker/torchserver looks like that.
+    data = [{"body": sample} for sample in flores_small1.data]
 
-    handle(flores_data, context)
+    manifest = {"model": {"serializedFile": "model.pt"}}
+    system_properties = {"model_dir": ".", "gpu_id": None}
+
+    class Context(NamedTuple):
+        system_properties: dict
+        manifest: dict
+
+    ctx = Context(system_properties, manifest)
+    batch_responses = handle(data, ctx)
+    print(batch_responses)
+
+    single_responses = [handle([d], ctx)[0] for d in data]
+    assert batch_responses == single_responses
