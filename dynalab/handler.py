@@ -18,6 +18,28 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+# TODO: what are the code for the following langs ???
+# ckb (cb_IQ, central Kurdish)
+RAW_LANG_MAPPING = (
+    "afr:af,amh:am,ara:ar,asm:as,ast:ast,aze:az,bel:be,ben:bn,bos:bs,bul:bg,"
+    "cat:ca,ceb:ceb,ces:cs,cym:cy,dan:da,deu:de,ell:el,eng:en,est:et,fas:fa,"
+    "fin:fi,fra:fr,ful:ff,gle:ga,glg:gl,guj:gu,hau:ha,heb:he,hin:hi,hrv:hr,"
+    "hun:hu,hye:hy,ibo:ig,ind:id,isl:is,ita:it,jav:jv,jpn:ja,kam:kam,kan:kn,"
+    "kat:ka,kaz:kk,kea:kea,khm:km,kir:ky,kor:ko,lao:lo,lav:lv,lin:ln,lit:lt,"
+    "ltz:lb,lug:lg,luo:luo,mal:ml,mar:mr,mkd:mk,mlt:mt,mon:mn,mri:mi,msa:ms,"
+    "mya:my,nep:ne,nld:nl,nob:no,nso:ns,nya:ny,oci:oc,orm:om,ory:or,pan:pa,"
+    "pol:pl,por:pt,pus:ps,ron:ro,rus:ru,slk:sk,slv:sl,sna:sn,snd:sd,som:so,"
+    "spa:es,srp:sr,swe:sv,swh:sw,tam:ta,tel:te,tgk:tg,tgl:tl,tha:th,tur:tr,"
+    "ukr:uk,umb:umb,urd:ur,uzb:uz,vie:vi,wol:wo,xho:xh,yor:yo,zho:zh,"
+    "zho_trad:zh,zul:zu"
+)
+
+
+LANG_MAPPING = dict(
+    pair.split(":") for pair in RAW_LANG_MAPPING.split(",")  # type: ignore
+)
+
+
 class FakeGenerator:
     """Fake sequence generator, that returns the input."""
 
@@ -85,7 +107,7 @@ class Handler(BaseDynaHandler):
 
     def lang_token(self, lang: str) -> int:
         # M100 uses 2 letter language codes.
-        simple_lang = lang.split("_")[0]
+        simple_lang = LANG_MAPPING[lang]
         token = self.vocab.index(f"__{simple_lang}__")
         assert token != self.vocab.unk(), f"Unknown language '{lang}' ({simple_lang})"
         return token
