@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 
 import fairseq.checkpoint_utils
@@ -17,6 +18,8 @@ from fairseq.data import data_utils
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Tell Torchserve to let use do the deserialization
+os.environ["TS_DECODE_INPUT_REQUEST"] = "false"
 
 # TODO: what are the code for the following langs ???
 # ckb (cb_IQ, central Kurdish)
@@ -44,7 +47,8 @@ class FakeGenerator:
     """Fake sequence generator, that returns the input."""
 
     def generate(self, models, sample, prefix_tokens=None):
-        return [[{"tokens": sample["net_input"]["src_tokens"][:-1]}]]
+        src_tokens = sample["net_input"]["src_tokens"]
+        return [[{"tokens": tokens[:-1]}] for tokens in src_tokens]
 
 
 class Handler(BaseDynaHandler):
@@ -189,12 +193,26 @@ class Handler(BaseDynaHandler):
 _service = Handler()
 
 
-def handle(data, context):
+def deserialize(data: bytes) -> list:
+    lines = data.decode("utf-8").splitlines()
+
+    documents = []
+    for i, l in enumerate(lines):
+        try:
+            documents.append(json.loads(l))
+        except Exception as e:
+            logging.error(f"Couldn't deserialize line {i}: {l}")
+            logging.exception(e)
+    return documents
+
+
+def handle(bin_data: bytes, context):
     if not _service.initialized:
         _service.initialize(context)
-    if data is None:
+    if bin_data is None:
         return None
 
+    data = deserialize(bin_data)
     input_data = _service.preprocess(data)
     output = _service.inference(input_data)
     response = _service.postprocess(output, data)
@@ -207,6 +225,7 @@ if __name__ == "__main__":
 
     # TODO: check that the data received from sagemaker/torchserver looks like that.
     data = [{"body": sample} for sample in flores_small1.data]
+    bin_data = b"\n".join(json.dumps(d).encode("utf-8") for d in data)
 
     manifest = {"model": {"serializedFile": "model.pt"}}
     system_properties = {"model_dir": ".", "gpu_id": None}
@@ -216,8 +235,8 @@ if __name__ == "__main__":
         manifest: dict
 
     ctx = Context(system_properties, manifest)
-    batch_responses = handle(data, ctx)
+    batch_responses = handle(bin_data, ctx)
     print(batch_responses)
 
-    single_responses = [handle([d], ctx)[0] for d in data]
+    single_responses = [handle(json.dumps(d).encode("utf-8"), ctx)[0] for d in data]
     assert batch_responses == single_responses
