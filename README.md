@@ -4,138 +4,277 @@
 
 --------------------------------------------------------------------------------
 
-# Facebook Low Resource MT Benchmark (FLoRes)
-FLoRes is a benchmark dataset for machine translation between English and four low resource languages, Nepali, Sinhala, Khmer and Pashto, based on sentences translated from Wikipedia.
-The data sets can be downloaded [HERE](https://github.com/facebookresearch/flores/raw/master/data/flores_test_sets.tgz).
+# The FLORES-101 Evaluation Benchmark for Low-Resource and Multilingual Machine Translation
+`FLORES-101` is a Many-to-Many multilingual translation benchmark dataset for 101 languages. 
 
-**New**: two new languages, Khmer and Pashto, are added to the dataset.
+* **Paper:** [The FLORES-101 Evaluation Benchmark for Low-Resource and Multilingual Machine Translation](https://ai.facebook.com/research/publications/the-flores-101-evaluation-benchmark-for-low-resource-and-multilingual-machine-translation).
 
-This repository contains data and baselines from the paper:  
-[The FLoRes Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English](https://arxiv.org/abs/1902.01382).
+* Download `FLORES-101` [**dataset**](https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz).
 
-## Baselines
+* Read the [**blogpost**](https://ai.facebook.com/blog/the-flores-101-data-set-helping-build-better-translation-systems-around-the-world).
 
-The following instructions will can be used to reproduce the baseline results from the paper.
+* Evaluation server: [dynabench](https://dynabench.org/flores), Note: instructions to submit model for evaluations will be added
 
-### Requirements
+Looking for FLORESv1, which included Nepali, Sinhala, Pashto, and Khmer? Click [here](floresv1/)
 
-The baseline uses the
-[Indic NLP Library](https://github.com/anoopkunchukuttan/indic_nlp_library) and
-[sentencepiece](https://github.com/google/sentencepiece) for preprocessing;
-[fairseq](https://github.com/pytorch/fairseq) for model training; and
-[sacrebleu](https://github.com/mjpost/sacreBLEU) for scoring.
+## Abstract
+One of the biggest challenges hindering progress in low-resource and multilingual machine translation is the lack of good evaluation benchmarks. 
+Current evaluation benchmarks either lack good coverage of low-resource languages, consider only restricted domains, or are low quality because they are constructed using semi-automatic procedures. In this work, we introduce the FLORES evaluation benchmark, consisting of 3001 sentences extracted from English Wikipedia and covering a variety of different topics and domains. These sentences have been translated in 101 languages by professional translators through a carefully controlled process. The resulting dataset enables better assessment of model quality on the long tail of low-resource languages, including the evaluation of many-to-many multilingual translation systems, as all translations are multilingually aligned. By publicly releasing such a high-quality and high-coverage dataset, we hope to foster progress in the machine translation community and beyond.
 
-Dependencies can be installed via pip:
-```
-$ pip install fairseq sacrebleu sentencepiece
-```
+## Download FLORES-101 Dataset 
+The data can be downloaded from: [Here](https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz).
 
-The Indic NLP Library will be cloned automatically by the `prepare-{ne,si}en.sh` scripts.
+## Evaluation 
 
-### Download and preprocess data
-
-The `download-data.sh` script can be used to download and extract the raw data.
-Thereafter the `prepare-neen.sh` and `prepare-sien.sh` scripts can be used to
-preprocess the raw data. In particular, they will use the sentencepiece library
-to learn a shared BPE vocabulary with 5000 subword units and binarize the data
-for training with fairseq.
-
-To download and extract the raw data:
-```
-$ bash download-data.sh
+### SPM-BLEU 
+For evaluation, we use SentencePiece BLEU (spBLEU) which uses a SentencePiece (SPM) tokenizer with 256K tokens and then BLEU score is computed on the sentence-piece tokenized text. This requires installing sacrebleu using a specific branch:
+```bash
+git clone --single-branch --branch adding_spm_tokenized_bleu https://github.com/ngoyal2707/sacrebleu.git
+cd sacrebleu
+python setup.py install
 ```
 
-Thereafter, run the following to preprocess the raw data:
-```
-$ bash prepare-neen.sh
-$ bash prepare-sien.sh
-```
+### Offline Evaluation
 
-### Train a baseline Transformer model
+#### Download FLORES-101 dev and devtest dataset
 
-To train a baseline Ne-En model on a single GPU:
-```
-$ CUDA_VISIBLE_DEVICES=0 fairseq-train \
-    data-bin/wiki_ne_en_bpe5000/ \
-    --source-lang ne --target-lang en \
-    --arch transformer --share-all-embeddings \
-    --encoder-layers 5 --decoder-layers 5 \
-    --encoder-embed-dim 512 --decoder-embed-dim 512 \
-    --encoder-ffn-embed-dim 2048 --decoder-ffn-embed-dim 2048 \
-    --encoder-attention-heads 2 --decoder-attention-heads 2 \
-    --encoder-normalize-before --decoder-normalize-before \
-    --dropout 0.4 --attention-dropout 0.2 --relu-dropout 0.2 \
-    --weight-decay 0.0001 \
-    --label-smoothing 0.2 --criterion label_smoothed_cross_entropy \
-    --optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0 \
-    --lr-scheduler inverse_sqrt --warmup-updates 4000 --warmup-init-lr 1e-7 \
-    --lr 1e-3 --min-lr 1e-9 \
-    --max-tokens 4000 \
-    --update-freq 4 \
-    --max-epoch 100 --save-interval 10
+```bash
+cd ~/
+wget https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz
+tar -xvzf flores101_dataset.tar.gz
 ```
 
-To train on 4 GPUs, remove the `--update-freq` flag and run `CUDA_VISIBLE_DEVICES=0,1,2,3 fairseq-train (...)`.
-If you have a Volta or newer GPU you can further improve training speed by adding the `--fp16` flag.
+#### Compute spBLEU
 
-This same architecture can be used for En-Ne, Si-En and En-Si:
-- For En-Ne, update the training command with:  
-  `fairseq-train data-bin/wiki_ne_en_bpe5000 --source-lang en --target-lang ne`
-- For Si-En, update the training command with:  
-  `fairseq-train data-bin/wiki_si_en_bpe5000 --source-lang si --target-lang en`
-- For En-Si, update the training command with:  
-  `fairseq-train data-bin/wiki_si_en_bpe5000 --source-lang en --target-lang si`
+Instructions for computing spBLEU for detokenized translations generated by a model 
 
-### Compute BLEU using sacrebleu
+```bash
+flores101_devtest=flores101_dataset/devtest
 
-Run beam search generation and scoring with sacrebleu:
-```
-$ fairseq-generate \
-    data-bin/wiki_ne_en_bpe5000/ \
-    --source-lang ne --target-lang en \
-    --path checkpoints/checkpoint_best.pt \
-    --beam 5 --lenpen 1.2 \
-    --gen-subset valid \
-    --remove-bpe=sentencepiece \
-    --sacrebleu
+# Path to generated detokenized translations file
+translation_file=/path/to/detok_trans.txt
+
+# Set the target language (for this example, English)
+trg_lang=eng
+
+cat $translation_file | sacrebleu -tok spm $flores101_devtest/${trg_lang}.devtest
 ```
 
-Note that the `--gen-subset valid` set is the FloRes **dev** set and `--gen-subset test` set is the FloRes **devtest** set.
-Replace `--gen-subset valid` with `--gen-subset test` above to score the FLoRes **devtest** set which is corresponding to the reported number in our paper.
+### Example walkthrough of Generation and Evaluation using a pre-trained model in fairseq
 
-**Tokenized BLEU for En-Ne and En-Si:**
+Following example walks shows evaluating released `M2M-124 615M` model on an example language pair of `Nyanja -> Swahili` on `FLORES-101` `devtest` which achieves `12.4` spBLEU.
 
-For these language pairs we report tokenized BLEU. You can compute tokenized BLEU by removing the `--sacrebleu` flag
-from generate.py:
-```
-$ fairseq-generate \
-    data-bin/wiki_ne_en_bpe5000/ \
-    --source-lang en --target-lang ne \
-    --path checkpoints/checkpoint_best.pt \
-    --beam 5 --lenpen 1.2 \
-    --gen-subset valid \
-    --remove-bpe=sentencepiece
-```
+#### Download model, sentencepiece vocab
 
-### Train iterative back-translation models
+```bash
+fairseq=/path/to/fairseq
+cd $fairseq
 
-After runing the commands in *Download and preprocess data* section above, run the following to download and preprocess the monolingual data:
-```
-$ bash prepare-monolingual.sh
+# Download 615M param model.
+wget https://dl.fbaipublicfiles.com/flores101/pretrained_models/flores101_mm100_615M.tar.gz
+
+# Extract 
+tar -xvzf flores101_mm100_615M.tar.gz
 ```
 
-To train the iterative back-translation for two iterations on Ne-En, run the following:
-```
-$ bash reproduce.sh ne_en
+#### Encode using our SentencePiece Model
+Note: Install SentencePiece from [here](https://github.com/google/sentencepiece)
+
+
+```bash
+flores101_dataset=/path/to/flores_dataset
+fairseq=/path/to/fairseq
+cd $fairseq
+
+# Example lang pair translation: Nyanja -> Swahili
+# MM100 code for Nyanja and Swahili: ny, sw
+
+SRC_LANG_CODE=nya
+TRG_LANG_CODE=swh
+
+SRC_MM100_LANG_CODE=ny
+TRG_MM100_LANG_CODE=sw
+
+python scripts/spm_encode.py \
+    --model flores101_mm100_615M/sentencepiece.bpe.model \
+    --output_format=piece \
+    --inputs=$flores101_dataset/devtest/${SRC_LANG_CODE}.devtest \
+    --outputs=spm.${SRC_MM100_LANG_CODE}-${TRG_MM100_LANG_CODE}.${SRC_MM100_LANG_CODE}
+
+python scripts/spm_encode.py \
+    --model flores101_mm100_615M/sentencepiece.bpe.model \
+    --output_format=piece \
+    --inputs=$flores101_dataset/devtest/${TRG_LANG_CODE}.devtest \
+    --outputs=spm.${SRC_MM100_LANG_CODE}-${TRG_MM100_LANG_CODE}.${TRG_MM100_LANG_CODE}
 ```
 
-The script will train an Ne-En supervised model, translate Nepali monolingual data, train En-Ne back-translation iteration 1 model, translate English monolingual data back to Nepali, and train Ne-En back-translation iteration 2 model. All the model training and data generation happen locally. The script uses all the GPUs listed in `CUDA_VISIBLE_DEVICES` variable unless certain cuda device ids are specified to `train.py`, and it is designed to adjust the hyper-parameters according to the number of available GPUs.  With 8 Tesla V100 GPUs, the full pipeline takes about 25 hours to finish. We expect the final BT iteration 2 Ne-En model achieves around 15.9 (sacre)BLEU score on devtest set. The script supports `ne_en`, `en_ne`, `si_en` and `en_si` directions.
+#### Binarization
+
+```bash
+fairseq-preprocess \
+    --source-lang ${SRC_MM100_LANG_CODE} --target-lang ${TRG_MM100_LANG_CODE} \
+    --testpref spm.${SRC_MM100_LANG_CODE}-${TRG_MM100_LANG_CODE} \
+    --thresholdsrc 0 --thresholdtgt 0 \
+    --destdir data_bin_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE} \
+    --srcdict flores101_mm100_615M/dict.txt --tgtdict flores101_mm100_615M/dict.txt
+```
+
+#### Generation 
+
+
+```bash
+fairseq-generate \
+    data_bin_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE} \
+    --batch-size 1 \
+    --path flores101_mm100_615M/model.pt \
+    --fixed-dictionary flores101_mm100_615M/dict.txt \
+    -s ${SRC_MM100_LANG_CODE} -t ${TRG_MM100_LANG_CODE} \
+    --remove-bpe 'sentencepiece' \
+    --beam 5 \
+    --task translation_multi_simple_epoch \
+    --lang-pairs flores101_mm100_615M/language_pairs.txt \
+    --decoder-langtok --encoder-langtok src \
+    --gen-subset test \
+    --fp16 \
+    --dataset-impl mmap \
+    --distributed-world-size 1 --distributed-no-spawn \
+    --results-path generation_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE}
+
+# clean fairseq generated file to only create hypotheses file.
+cat generation_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE}/generate-test.txt  | grep -P '^H-'  | cut -c 3- | sort -n -k 1 | awk -F "\t" '{print $NF}' > generation_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE}/sys.txt
+```
+
+#### spBLEU Evaluation
+
+
+```bash
+# Get score
+sacrebleu flores101_dataset/devtest/${TRG_LANG_CODE}.devtest < generation_${SRC_MM100_LANG_CODE}_${TRG_MM100_LANG_CODE}/sys.txt --tokenize spm
+# Expected Outcome:
+# BLEU+case.mixed+numrefs.1+smooth.exp+tok.spm+version.1.5.0 = 12.4 34.9/15.8/8.7/4.9 (BP = 1.000 ratio = 1.007 hyp_len = 37247 ref_len = 36999)
+```
+
+## List of Languages
+
+Language | FLORES-101 code | MM100 lang code
+---|---|---
+Akrikaans | afr | af
+Amharic | amh | am
+Arabic | ara | ar
+Armenian | hye | hy
+Assamese | asm | as
+Asturian | ast | ast
+Azerbaijani | azj | az
+Belarusian | bel | be
+Bengali | ben | bn
+Bosnian | bos | bs
+Bulgarian | bul | bg
+Burmese | mya | my
+Catalan | cat | ca
+Cebuano | ceb | ceb
+Chinese Simpl | zho_simpl | zho
+Chinese Trad | zho_trad | zho
+Croatian | hrv | hr
+Czech | ces | cs
+Danish | dan | da
+Dutch | nld | nl
+English | eng | en
+Estonian | est | et
+Filipino (Tagalog) | tgl | tl
+Finnish | fin | fi
+French | fra | fr
+Fulah | ful | ff
+Galician | glg | gl
+Ganda | lug | lg
+Georgian | kat | ka
+German | deu | de
+Greek | ell | el
+Gujarati | guj | gu
+Hausa | hau | ha
+Hebrew | heb | he
+Hindi | hin | hi
+Hungarian | hun | hu
+Icelandic | isl | is
+Igbo | ibo | ig
+Indonesian | ind | id
+Irish | gle | ga
+Italian | ita | it
+Japanese | jpn | ja
+Javanese | jav | jv
+Kabuverdianu | kea | kea
+Kamba | kam | kam
+Kannada | kan | kn
+Kazakh | kaz | kk
+Khmer | khm | km
+Korean | kor | ko
+Kyrgyz | kir | ky
+Lao | lao | lo
+Latvian | lav | lv
+Lingala | lin | ln
+Lithuanian | lit | lt
+Luo | luo | luo
+Luxembourgish | ltz | lb
+Macedonian | mkd | mk 
+Malay | msa | ms
+Malayalam | mal | ml
+Maltese | mlt | mt
+Maori | mri | mi
+Marathi | mar | mr
+Mongolian | mon | mn
+Nepali | npi | ne
+Northern Sotho | nso | ns
+Norwegian | nob | no
+Nyanja | nya | ny
+Occitan | oci | oc
+Oriya | ory | or
+Oromo | orm | om
+Pashto | pus | ps
+Persian | fas | fa
+Polish | pol | pl
+Portuguese (Brazil) | por | pt
+Punjabi | pan | pa
+Romanian | ron | ro
+Russian | rus | ru
+Serbian | srp | sr
+Shona | sna | sn
+Sindhi | snd | sd
+Slovak | slk | sk
+Slovenian | slv | sl
+Somali | som | so
+Sorani Kurdish | ckb | ku
+Spanish (Latin American) | spa | es
+Swahili | swh | sw
+Swedish | swe | sv
+Tajik | tgk | tg
+Tamil | tam | ta
+Telugu | tel | te
+Thai | tha | th
+Turkish | tur | tr
+Ukrainian | ukr | uk
+Umbundu | umb | umb
+Urdu | urd | ur
+Uzbek | uzb | uz
+Vietnamese | vie | vi
+Welsh | cym | cy
+Wolof | wol | wo
+Xhosa | xho | xh
+Yoruba | yor | yo
+Zulu | zul | zu
+
+## WMT Task
+The FLORES-101 dataset is being used for the WMT2021 Large-Scale Multilingual Machine Translation Shared Task. You can learn more about the task [HERE](http://www.statmt.org/wmt21/large-scale-multilingual-translation-task.html). We also provide two pretrained models, downloadable from the WMT task page. 
 
 ## Citation
 
 If you use this data in your work, please cite:
 
 ```bibtex
+@inproceedings{,
+  title={The FLORES Evaluation Benchmark for Low-Resource and Multilingual Machine Translation},
+  author={Goyal, Naman and Gao, Cynthia and Chaudhary, Vishrav and Chen, Peng-Jen and Wenzek, Guillaume and Ju, Da and Krishnan, Sanjana and Ranzato, Marc'Aurelio and Guzm\'{a}n, Francisco and Fan, Angela},
+  year={2021}
+}
+
 @inproceedings{,
   title={Two New Evaluation Datasets for Low-Resource Machine Translation: Nepali-English and Sinhala-English},
   author={Guzm\'{a}n, Francisco and Chen, Peng-Jen and Ott, Myle and Pino, Juan and Lample, Guillaume and Koehn, Philipp and Chaudhary, Vishrav and Ranzato, Marc'Aurelio},
@@ -145,15 +284,7 @@ If you use this data in your work, please cite:
 ```
 
 ## Changelog
-- 2020-04-02: Add two new langauge pairs, Khmer-English, Pashto-English.
-- 2019-11-04: Add config to reproduce iterative back-translation result on Sinhala-English and English-Sinhala.
-- 2019-10-23: Add script to reproduce iterative back-translation result on Nepali-English and English-Nepali.
-- 2019-10-18: Add final test set.
-- 2019-05-20: Remove extra carriage return character from Nepali-English parallel dataset.
-- 2019-04-18: Specify the linebreak character in the sentencepiece encoding script to fix small portion of misaligned parallel sentences in Nepali-English parallel dataset.
-- 2019-03-08: Update tokenizer script to make it compatible with previous version of indic_nlp.
-- 2019-02-14: Update dataset preparation script to avoid unexpected extra line being added to each paralel dataset.
-
+- 2021-06-04: Released FLORES-101
 
 ## License
 The dataset is licenced under CC-BY-SA, see the LICENSE file for details.
