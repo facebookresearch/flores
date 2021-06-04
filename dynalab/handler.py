@@ -21,25 +21,28 @@ logger.setLevel(logging.INFO)
 # Tell Torchserve to let use do the deserialization
 os.environ["TS_DECODE_INPUT_REQUEST"] = "false"
 
-# TODO: what are the code for the following langs ???
-# ckb (cb_IQ, central Kurdish)
-RAW_LANG_MAPPING = (
-    "afr:af,amh:am,ara:ar,asm:as,ast:ast,aze:az,bel:be,ben:bn,bos:bs,bul:bg,"
-    "cat:ca,ceb:ceb,ces:cs,cym:cy,dan:da,deu:de,ell:el,eng:en,est:et,fas:fa,"
-    "fin:fi,fra:fr,ful:ff,gle:ga,glg:gl,guj:gu,hau:ha,heb:he,hin:hi,hrv:hr,"
-    "hun:hu,hye:hy,ibo:ig,ind:id,isl:is,ita:it,jav:jv,jpn:ja,kam:kam,kan:kn,"
-    "kat:ka,kaz:kk,kea:kea,khm:km,kir:ky,kor:ko,lao:lo,lav:lv,lin:ln,lit:lt,"
-    "ltz:lb,lug:lg,luo:luo,mal:ml,mar:mr,mkd:mk,mlt:mt,mon:mn,mri:mi,msa:ms,"
-    "mya:my,nep:ne,nld:nl,nob:no,nso:ns,nya:ny,oci:oc,orm:om,ory:or,pan:pa,"
-    "pol:pl,por:pt,pus:ps,ron:ro,rus:ru,slk:sk,slv:sl,sna:sn,snd:sd,som:so,"
-    "spa:es,srp:sr,swe:sv,swh:sw,tam:ta,tel:te,tgk:tg,tgl:tl,tha:th,tur:tr,"
-    "ukr:uk,umb:umb,urd:ur,uzb:uz,vie:vi,wol:wo,xho:xh,yor:yo,zho:zh,"
-    "zho_trad:zh,zul:zu"
-)
+
+def mapping(languages: str) -> dict:
+    return dict(
+        tuple(pair.split(":"))
+        for pair in languages.strip().replace("\n", "").split(",")
+    )
 
 
-LANG_MAPPING = dict(
-    pair.split(":") for pair in RAW_LANG_MAPPING.split(",")  # type: ignore
+ISO2M100 = mapping(
+    """
+afr:af,amh:am,ara:ar,asm:as,ast:ast,azj:az,bel:be,ben:bn,bos:bs,bul:bg,
+cat:ca,ceb:ceb,ces:cs,ckb:ku,cym:cy,dan:da,deu:de,ell:el,eng:en,est:et,
+fas:fa,fin:fi,fra:fr,ful:ff,gle:ga,glg:gl,guj:gu,hau:ha,heb:he,hin:hi,
+hrv:hr,hun:hu,hye:hy,ibo:ig,ind:id,isl:is,ita:it,jav:jv,jpn:ja,kam:kam,
+kan:kn,kat:ka,kaz:kk,kea:kea,khm:km,kir:ky,kor:ko,lao:lo,lav:lv,lin:ln,
+lit:lt,ltz:lb,lug:lg,luo:luo,mal:ml,mar:mr,mkd:mk,mlt:mt,mon:mn,mri:mi,
+msa:ms,mya:my,nld:nl,nob:no,npi:ne,nso:ns,nya:ny,oci:oc,orm:om,ory:or,
+pan:pa,pol:pl,por:pt,pus:ps,ron:ro,rus:ru,slk:sk,slv:sl,sna:sn,snd:sd,
+som:so,spa:es,srp:sr,swe:sv,swh:sw,tam:ta,tel:te,tgk:tg,tgl:tl,tha:th,
+tur:tr,ukr:uk,umb:umb,urd:ur,uzb:uz,vie:vi,wol:wo,xho:xh,yor:yo,zho_simp:zh,
+zho_trad:zh,zul:zu
+"""
 )
 
 
@@ -110,8 +113,8 @@ class Handler(BaseDynaHandler):
         self.initialized = True
 
     def lang_token(self, lang: str) -> int:
-        # M100 uses 2 letter language codes.
-        simple_lang = LANG_MAPPING[lang]
+        """Converts the ISO 639-3 language code to MM100 language codes."""
+        simple_lang = ISO2M100[lang]
         token = self.vocab.index(f"__{simple_lang}__")
         assert token != self.vocab.unk(), f"Unknown language '{lang}' ({simple_lang})"
         return token
@@ -136,8 +139,8 @@ class Handler(BaseDynaHandler):
         }
         return sample
 
-    def preprocess(self, data):
-        samples = [self.preprocess_one(s["body"]) for s in data]
+    def preprocess(self, samples):
+        samples = [self.preprocess_one(s) for s in samples]
         prefix_tokens = torch.tensor([[s["tgt_token"]] for s in samples])
         src_lengths = torch.tensor([s["src_length"] for s in samples])
         src_tokens = data_utils.collate_tokens(
@@ -168,7 +171,7 @@ class Handler(BaseDynaHandler):
         # We also need to strip the language token.
         return [hypos[0]["tokens"][1:] for hypos in generated]
 
-    def postprocess(self, inference_output, data):
+    def postprocess(self, inference_output, samples: list):
         """
         post process inference output into a response.
         response should be a list of json
@@ -183,49 +186,58 @@ class Handler(BaseDynaHandler):
         return [
             # Signing required by dynabench, don't remove.
             self.taskIO.sign_response(
-                {"id": sample["body"]["uid"], "translatedText": translation},
-                sample["body"],
+                {"id": sample["uid"], "translatedText": translation},
+                sample,
             )
-            for translation, sample in zip(translations, data)
+            for translation, sample in zip(translations, samples)
         ]
 
 
 _service = Handler()
 
 
-def deserialize(data: bytes) -> list:
-    lines = data.decode("utf-8").splitlines()
+def deserialize(torchserve_data: list) -> list:
+    samples = []
+    for torchserve_sample in torchserve_data:
+        data = torchserve_sample["body"]
+        # In case torchserve did the deserialization for us.
+        if isinstance(data, dict):
+            samples.append(data)
+        elif isinstance(data, (bytes, bytearray)):
+            lines = data.decode("utf-8").splitlines()
+            for i, l in enumerate(lines):
+                try:
+                    samples.append(json.loads(l))
+                except Exception as e:
+                    logging.error(f"Couldn't deserialize line {i}: {l}")
+                    logging.exception(e)
+        else:
+            logging.error(f"Unexpected payload: {data}")
 
-    documents = []
-    for i, l in enumerate(lines):
-        try:
-            documents.append(json.loads(l))
-        except Exception as e:
-            logging.error(f"Couldn't deserialize line {i}: {l}")
-            logging.exception(e)
-    return documents
+    return samples
 
 
-def handle(bin_data: bytes, context):
+def handle(torchserve_data, context):
     if not _service.initialized:
         _service.initialize(context)
-    if bin_data is None:
+    if torchserve_data is None:
         return None
 
-    data = deserialize(bin_data)
+    data = deserialize(torchserve_data)
     input_data = _service.preprocess(data)
     output = _service.inference(input_data)
     response = _service.postprocess(output, data)
+    if len(torchserve_data) == 1:
+        return [response]
 
     return response
 
 
-if __name__ == "__main__":
+def local_test():
     from dynalab.tasks import flores_small1
 
-    # TODO: check that the data received from sagemaker/torchserver looks like that.
-    data = [{"body": sample} for sample in flores_small1.data]
-    bin_data = b"\n".join(json.dumps(d).encode("utf-8") for d in data)
+    bin_data = b"\n".join(json.dumps(d).encode("utf-8") for d in flores_small1.data)
+    torchserve_data = [{"body": bin_data}]
 
     manifest = {"model": {"serializedFile": "model.pt"}}
     system_properties = {"model_dir": ".", "gpu_id": None}
@@ -235,8 +247,15 @@ if __name__ == "__main__":
         manifest: dict
 
     ctx = Context(system_properties, manifest)
-    batch_responses = handle(bin_data, ctx)
+    batch_responses = handle(torchserve_data, ctx)
     print(batch_responses)
 
-    single_responses = [handle(json.dumps(d).encode("utf-8"), ctx)[0] for d in data]
+    single_responses = [[
+        handle([{"body": json.dumps(d).encode("utf-8")}], ctx)[0][0]
+        for d in flores_small1.data
+    ]]
     assert batch_responses == single_responses
+
+
+if __name__ == "__main__":
+    local_test()
