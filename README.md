@@ -270,7 +270,7 @@ If you use this data in your work, please cite:
 
 ```bibtex
 @inproceedings{,
-  title={The FLORES Evaluation Benchmark for Low-Resource and Multilingual Machine Translation},
+  title={The FLORES-101  Evaluation Benchmark for Low-Resource and Multilingual Machine Translation},
   author={Goyal, Naman and Gao, Cynthia and Chaudhary, Vishrav and Chen, Peng-Jen and Wenzek, Guillaume and Ju, Da and Krishnan, Sanjana and Ranzato, Marc'Aurelio and Guzm\'{a}n, Francisco and Fan, Angela},
   year={2021}
 }
