@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 import os
 from pathlib import Path
 
@@ -223,14 +224,27 @@ def handle(torchserve_data, context):
     if torchserve_data is None:
         return None
 
-    data = deserialize(torchserve_data)
-    input_data = _service.preprocess(data)
-    output = _service.inference(input_data)
-    response = _service.postprocess(output, data)
-    if len(torchserve_data) == 1:
-        return [response]
+    start_time = time.time()
+    samples = deserialize(torchserve_data)
+    n = len(samples)
+    logger.info(f"Deserialized a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
 
-    return response
+    start_time = time.time()
+    input_data = _service.preprocess(samples)
+    logger.info(f"Preprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
+
+    start_time = time.time()
+    output = _service.inference(input_data)
+    logger.info(f"Infered a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
+
+    start_time = time.time()
+    response = _service.postprocess(output, samples)
+    logger.info(f"Postprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
+
+
+
+    # TODO: handle torchserve batches
+    return [response]
 
 
 def local_test():
