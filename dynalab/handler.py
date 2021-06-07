@@ -125,7 +125,7 @@ class Handler(BaseDynaHandler):
         tokens = [self.vocab.index(word) for word in words]
         return tokens
 
-    def preprocess_one(self, sample):
+    def preprocess_one(self, sample) -> dict:
         """
         preprocess data into a format that the model can do inference on
         """
@@ -140,7 +140,7 @@ class Handler(BaseDynaHandler):
         }
         return sample
 
-    def preprocess(self, samples):
+    def preprocess(self, samples) -> dict:
         samples = [self.preprocess_one(s) for s in samples]
         prefix_tokens = torch.tensor([[s["tgt_token"]] for s in samples])
         src_lengths = torch.tensor([s["src_length"] for s in samples])
@@ -172,7 +172,7 @@ class Handler(BaseDynaHandler):
         # We also need to strip the language token.
         return [hypos[0]["tokens"][1:] for hypos in generated]
 
-    def postprocess(self, inference_output, samples: list):
+    def postprocess(self, inference_output, samples: list) -> list:
         """
         post process inference output into a response.
         response should be a list of json
@@ -218,6 +218,28 @@ def deserialize(torchserve_data: list) -> list:
     return samples
 
 
+def handle_mini_batch(service, samples):
+    n = len(samples)
+    start_time = time.time()
+    input_data = service.preprocess(samples)
+    logger.info(
+        f"Preprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
+    )
+
+    start_time = time.time()
+    output = service.inference(input_data)
+    logger.info(
+        f"Infered a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
+    )
+
+    start_time = time.time()
+    results = service.postprocess(output, samples)
+    logger.info(
+        f"Postprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
+    )
+    return results
+
+
 def handle(torchserve_data, context):
     if not _service.initialized:
         _service.initialize(context)
@@ -225,26 +247,25 @@ def handle(torchserve_data, context):
         return None
 
     start_time = time.time()
-    samples = deserialize(torchserve_data)
-    n = len(samples)
-    logger.info(f"Deserialized a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
+    all_samples = deserialize(torchserve_data)
+    n = len(all_samples)
+    logger.info(
+        f"Deserialized a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
+    )
+    # Adapt this to your model. The GPU has 16Gb of RAM.
+    batch_size = 128
+    results = []
+    samples = []
+    for i, sample in enumerate(all_samples):
+        samples.append(sample)
+        if len(samples) < batch_size and i + 1 < n:
+            continue
 
-    start_time = time.time()
-    input_data = _service.preprocess(samples)
-    logger.info(f"Preprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
+        results.extend(handle_mini_batch(_service, samples))
+        samples = []
+    assert len(results)
 
-    start_time = time.time()
-    output = _service.inference(input_data)
-    logger.info(f"Infered a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
-
-    start_time = time.time()
-    response = _service.postprocess(output, samples)
-    logger.info(f"Postprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)")
-
-
-
-    # TODO: handle torchserve batches
-    return [response]
+    return [results]
 
 
 def local_test():
@@ -264,10 +285,12 @@ def local_test():
     batch_responses = handle(torchserve_data, ctx)
     print(batch_responses)
 
-    single_responses = [[
-        handle([{"body": json.dumps(d).encode("utf-8")}], ctx)[0][0]
-        for d in flores_small1.data
-    ]]
+    single_responses = [
+        [
+            handle([{"body": json.dumps(d).encode("utf-8")}], ctx)[0][0]
+            for d in flores_small1.data
+        ]
+    ]
     assert batch_responses == single_responses
 
 
