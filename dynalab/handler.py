@@ -159,6 +159,10 @@ class Handler(BaseDynaHandler):
             "prefix_tokens": prefix_tokens.to(self.device),
         }
 
+    def strip_pad(self, sentence):
+        assert sentence.ndim == 1
+        return sentence[sentence.ne(self.vocab.pad())]
+
     @torch.no_grad()
     def inference(self, input_data: dict) -> list:
         generated = self.sequence_generator.generate(
@@ -182,7 +186,8 @@ class Handler(BaseDynaHandler):
         ```
         """
         translations = [
-            self.vocab.string(tokens, "sentencepiece") for tokens in inference_output
+            self.vocab.string(self.strip_pad(sentence), "sentencepiece")
+            for sentence in inference_output
         ]
         return [
             # Signing required by dynabench, don't remove.
@@ -233,11 +238,11 @@ def handle_mini_batch(service, samples):
     )
 
     start_time = time.time()
-    results = service.postprocess(output, samples)
+    json_results = service.postprocess(output, samples)
     logger.info(
         f"Postprocessed a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
     )
-    return results
+    return json_results
 
 
 def handle(torchserve_data, context):
@@ -263,9 +268,14 @@ def handle(torchserve_data, context):
 
         results.extend(handle_mini_batch(_service, samples))
         samples = []
-    assert len(results)
 
-    return [results]
+    assert len(results)
+    start_time = time.time()
+    response = "\n".join(json.dumps(r, indent=None, ensure_ascii=False) for r in results)
+    logger.info(
+        f"Serialized a batch of size {n} ({n/(time.time()-start_time):.2f} samples / s)"
+    )
+    return [response]
 
 
 def local_test():
@@ -286,12 +296,10 @@ def local_test():
     print(batch_responses)
 
     single_responses = [
-        [
-            handle([{"body": json.dumps(d).encode("utf-8")}], ctx)[0][0]
-            for d in flores_small1.data
-        ]
+        handle([{"body": json.dumps(d).encode("utf-8")}], ctx)[0]
+        for d in flores_small1.data
     ]
-    assert batch_responses == single_responses
+    assert batch_responses == ["\n".join(single_responses)]
 
 
 if __name__ == "__main__":
