@@ -1,0 +1,13 @@
+{
+    "task": "flores_small1",
+    "checkpoint": "model.pt",
+    "handler": "handler.py",
+    "requirements": true,
+    "setup": false,
+    "model_files": [
+        "model_generation.json",
+        "dict.txt",
+        "sentencepiece.bpe.model"
+    ],
+    "exclude": []
+}

@@ -1,0 +1,7 @@
+{
+    "dummy": false,
+    "beam_size": 1,
+    "max_len_a": 1.3,
+    "max_len_b": 5,
+    "min_len": 5
+}
