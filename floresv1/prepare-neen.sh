@@ -26,7 +26,7 @@ SPM_TRAIN=$SCRIPTS/spm_train.py
 SPM_ENCODE=$SCRIPTS/spm_encode.py
 
 URLS=(
-    "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
+    "https://github.com/facebookresearch/flores/raw/main/floresv1/data/wikipedia_en_ne_si_test_sets.tgz"
 )
 ARCHIVES=(
     "wikipedia_en_ne_si_test_sets.tgz"
