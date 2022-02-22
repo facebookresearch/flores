@@ -18,6 +18,9 @@
 
 Looking for FLORESv1, which included Nepali, Sinhala, Pashto, and Khmer? Click [here](floresv1/)
 
+## Learn More in This Intro Video
+[![Explain Like I’m 5: FLoRes](https://img.youtube.com/vi/mq3keaYhzag/0.jpg)](https://www.youtube.com/watch?v=mq3keaYhzag)
+
 ## Abstract
 One of the biggest challenges hindering progress in low-resource and multilingual machine translation is the lack of good evaluation benchmarks. 
 Current evaluation benchmarks either lack good coverage of low-resource languages, consider only restricted domains, or are low quality because they are constructed using semi-automatic procedures. In this work, we introduce the FLORES evaluation benchmark, consisting of 3001 sentences extracted from English Wikipedia and covering a variety of different topics and domains. These sentences have been translated in 101 languages by professional translators through a carefully controlled process. The resulting dataset enables better assessment of model quality on the long tail of low-resource languages, including the evaluation of many-to-many multilingual translation systems, as all translations are multilingually aligned. By publicly releasing such a high-quality and high-coverage dataset, we hope to foster progress in the machine translation community and beyond.
