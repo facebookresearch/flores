@@ -109,8 +109,8 @@ download_opus_data $NE_ROOT $NE_TGT
 
 
 # Download and extract Global Voices data
-GLOBAL_VOICES="$NE_ROOT/globalvoices.2018q4.ne-en"
-GLOBAL_VOICES_URL="http://www.casmacat.eu/corpus/global-voices/globalvoices.ne-en.xliff.gz"
+GLOBAL_VOICES="$NE_ROOT/en-ne.xml"
+GLOBAL_VOICES_URL="https://opus.nlpl.eu/download.php?f=GlobalVoices/v2018q4/xml/en-ne.xml.gz"
 
 download_data $GLOBAL_VOICES.gz $GLOBAL_VOICES_URL
 gunzip -Nf $GLOBAL_VOICES.gz
@@ -151,12 +151,14 @@ cat $XML_BIBLES_DUP/aligned/*/Nepali.txt > $NE_ROOT/bible_dup.$SRC-$NE_TGT.$NE_T
 REMOVE_FILE_PATHS+=( bible-corpus-1.2.1 bible.tar.gz $BIBLE_TOOLS $XML_BIBLES $XML_BIBLES_DUP )
 
 
+# If you want to download en-hi then you have to manually do it here https://www.cfilt.iitb.ac.in/iitb_parallel/dataset.html
+
 # Download parallel en-hi corpus
-download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz"
+# download_data $DATA/en-hi.tgz "http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz"
 #download_data $DATA/en-hi.tgz "https://www.cse.iitb.ac.in/~anoopk/share/iitb_en_hi_parallel/iitb_corpus_download/parallel.tgz"
-tar xvzf $DATA/en-hi.tgz
-cp parallel/* $HI_ROOT/
-REMOVE_FILE_PATHS+=( parallel $DATA/en-hi.tgz )
+# tar xvzf $DATA/en-hi.tgz
+# cp parallel/* $HI_ROOT/
+# REMOVE_FILE_PATHS+=( parallel $DATA/en-hi.tgz )
 
 
 # Download and extract the Penn Treebank dataset
@@ -204,7 +206,7 @@ REMOVE_FILE_PATHS+=( $NE_DICT dictionaries )
 
 
 # Download test sets
-download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/master/data/wikipedia_en_ne_si_test_sets.tgz"
+download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/main/data/wikipedia_en_ne_si_test_sets.tgz"
 REMOVE_FILE_PATHS+=( $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch )
 
 pushd $DATA/
