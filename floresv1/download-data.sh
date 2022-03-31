@@ -40,12 +40,14 @@ NE_OPUS_DATASETS=(
   "$NE_ROOT/GNOME.en-ne"
   "$NE_ROOT/Ubuntu.en-ne"
   "$NE_ROOT/KDE4.en-ne"
+  "$NE_ROOT/GlobalVoices.en-ne"
 )
 
 NE_OPUS_URLS=(
   "https://object.pouta.csc.fi/OPUS-GNOME/v1/moses/en-ne.txt.zip"
   "https://object.pouta.csc.fi/OPUS-Ubuntu/v14.10/moses/en-ne.txt.zip"
   "https://object.pouta.csc.fi/OPUS-KDE4/v2/moses/en-ne.txt.zip"
+  "https://opus.nlpl.eu/download.php?f=GlobalVoices/v2018q4/moses/en-ne.txt.zip"
 )
 
 REMOVE_FILE_PATHS=()
@@ -106,19 +108,6 @@ cp ${SI_OPUS_DATASETS[3]}.$SI_TGT $SI_ROOT/OpenSubtitles2018.$SRC-$SI_TGT.$SI_TG
 REMOVE_FILE_PATHS+=( ${SI_OPUS_DATASETS[3]}.$SRC ${SI_OPUS_DATASETS[3]}.$SI_TGT )
 
 download_opus_data $NE_ROOT $NE_TGT
-
-
-# Download and extract Global Voices data
-GLOBAL_VOICES="$NE_ROOT/en-ne.xml"
-GLOBAL_VOICES_URL="https://opus.nlpl.eu/download.php?f=GlobalVoices/v2018q4/xml/en-ne.xml.gz"
-
-download_data $GLOBAL_VOICES.gz $GLOBAL_VOICES_URL
-gunzip -Nf $GLOBAL_VOICES.gz
-
-sed -ne 's?.*<source>\(.*\)</source>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$NE_TGT
-sed -ne 's?.*<target[^>]*>\(.*\)</target>.*?\1?p' $GLOBAL_VOICES > $GLOBAL_VOICES.$SRC
-
-REMOVE_FILE_PATHS+=( $GLOBAL_VOICES )
 
 # Download and extract the bible dataset
 BIBLE_TOOLS=$ROOT/bible-corpus-tools
