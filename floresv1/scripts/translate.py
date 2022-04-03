@@ -84,6 +84,7 @@ def translate_files(args, dest_dir, input_files):
         --max-len-b {args.max_len_b} \
         --buffer-size {args.buffer_size} \
         --max-tokens {args.max_tokens} \
+        --skip-invalid-size-inputs-valid-test \
         --num-workers {args.cpu} > {{output_file}} && \
     echo "finished" >> {{output_file}}
     """
