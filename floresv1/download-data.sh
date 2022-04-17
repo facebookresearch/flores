@@ -99,7 +99,7 @@ download_opus_data() {
   cat ${DATASETS[0]}.$TGT ${DATASETS[1]}.$TGT ${DATASETS[2]}.$TGT > $LANG_ROOT/GNOMEKDEUbuntu.$SRC-$TGT.$TGT
 
   # remove blank lines from GlobalVoices
-  sed -i '/^$/d' ${DATASETS[4]}.$SRC 
+  sed -i '/^$/d' ${DATASETS[4]}.$SRC
   sed -i '/^$/d' ${DATASETS[4]}.$TGT
 
   REMOVE_FILE_PATHS+=( ${DATASETS[0]}.$SRC ${DATASETS[1]}.$SRC ${DATASETS[2]}.$SRC )
@@ -199,7 +199,7 @@ REMOVE_FILE_PATHS+=( $NE_DICT dictionaries )
 
 
 # Download test sets
-download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/main/data/wikipedia_en_ne_si_test_sets.tgz"
+download_data $DATA/wikipedia_en_ne_si_test_sets.tgz "https://github.com/facebookresearch/flores/raw/main/floresv1/data/wikipedia_en_ne_si_test_sets.tgz"
 REMOVE_FILE_PATHS+=( $MOSES $NE_TAGGED original.zip $DATA/nepali-penn-treebank.$SRC.patch $DATA/nepali-penn-treebank.$NE_TGT.patch )
 
 pushd $DATA/
