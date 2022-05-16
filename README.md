@@ -9,7 +9,7 @@
 
 * **Paper:** [The FLORES-101 Evaluation Benchmark for Low-Resource and Multilingual Machine Translation](https://ai.facebook.com/research/publications/the-flores-101-evaluation-benchmark-for-low-resource-and-multilingual-machine-translation).
 
-* Download `FLORES-101` [**dataset**](https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz).
+* Download `FLORES-101` [**dataset**](https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz) and the [WMT22 supplement](https://dl.fbaipublicfiles.com/flores101/dataset/flores_wmt22_supplement.tar.gz).
 
 * Read the [**blogpost**](https://ai.facebook.com/blog/the-flores-101-data-set-helping-build-better-translation-systems-around-the-world) and [**paper**](https://ai.facebook.com/research/publications/the-flores-101-evaluation-benchmark-for-low-resource-and-multilingual-machine-translation).
 
@@ -27,6 +27,8 @@ Current evaluation benchmarks either lack good coverage of low-resource language
 
 ## Download FLORES-101 Dataset 
 The data can be downloaded from: [Here](https://dl.fbaipublicfiles.com/flores101/dataset/flores101_dataset.tar.gz).
+
+A supplement to FLORES-101 was released for the WMT22 Shared Task on [Large-Scale Machine Translation Evaluation for African Languages](https://statmt.org/wmt22/large-scale-multilingual-translation-task.html) and can be downloaded from [here](https://dl.fbaipublicfiles.com/flores101/dataset/flores_wmt22_supplement.tar.gz).
 
 ## Evaluation 
 
