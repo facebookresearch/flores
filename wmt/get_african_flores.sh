@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p african_flores
 mkdir -p african_flores/dev
 mkdir -p african_flores/devtest
