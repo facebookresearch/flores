@@ -29,6 +29,6 @@ do
 	done
 done
 
-# clean archive and unused folders
+# delete archive and unused folders
 rm -r flores*
 
