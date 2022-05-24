@@ -1,0 +1,12 @@
+editdistance
+google-cloud-storage
+google-cloud-vision
+levenshtein
+numpy
+opencv-python
+pandas
+pdf2image
+pillow
+requests
+tqdm
+xmltodict

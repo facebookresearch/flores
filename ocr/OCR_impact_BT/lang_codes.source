@@ -1,0 +1,1 @@
+declare -A LANG_CODES=(["pus"]="ps" ["jpn"]="ja" ["khm"]="km" ["npi"]="ne" ["lao"]="lo" ["amh"]="am" ["tam"]="ta")

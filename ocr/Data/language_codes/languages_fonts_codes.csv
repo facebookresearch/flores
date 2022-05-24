@@ -1,0 +1,61 @@
+Language,Code,Script,Fonts,Tesseract Code
+Amharic,amh,Ge’ez,NotoSansEthiopic-Regular,amh
+Armenian,hye,Armenian,NotoSerifArmenian-Regular,hye
+Asturian,ast,Latin,TimesNewRoman; Arial,fra
+Belarusian,bel,Cyrillic,Arial; Verdana,bel
+Bengali,ben,Bengali,Verdana; NotoSansBengali-Regular,ben
+Bulgarian,bul,Cyrillic,Arial; Verdana,bul
+Burmese,mya,Myanmar,TimesNewRoman; NotoSansMyanmar-Regular,mya
+Georgian,kat,Georgian,NotoSerifGeorgian-Regular,kat
+Greek,ell,Greek,Arial,ell
+Gujarati,guj,Gujarati,NotoSerifGujarati-Regular,guj
+Hebrew,heb,Hebrew,NotoSerifHebrew-Regular,heb
+Hindi,hin,Devanagari,NotoSansDevanagari-Regular,hin
+Japanese,jpn,Han; Hiragana; Katakana,Arial; Sim Sun; Yahei,jpn
+Kannada,kan,Telugu-Kannada,NotoSansKannada-Regular,kan
+Kazakh,kaz,Cyrillic,Arial; Verdana,kaz
+Khmer,khm,Khmer,NotoSansKhmer-Regular,khm
+Korean,kor,Hangul,Arial; Noto Sans KR,kor
+Kyrgyz,kir,Cyrillic,Arial; Verdana,kir
+Lao,lao,Lao,NotoSansLao-Regular; Verdana,lao
+Macedonian,mkd,Cyrillic,Arial; Verdana,mkd
+Malayalam,mal,Malayalam,Verdana; NotoSansMalayalam-Regular,mal
+Marathi,mar,Devanagari,NotoSansDevanagari-Regular,mar
+Nepali,npi,Devanagari,NotoSansDevanagari-Regular,nep
+Pashto,pbu,Perso-Arabic,Verdana; Calibri; Dubai,pus
+Punjabi,pan,Gurmukhi,NotoSansGurmukhi-Regular,pan
+Russian,rus,Cyrillic,Arial; Verdana,rus
+Serbian,srp,Cyrillic,Arial; Verdana,srp
+Tajik,tgk,Cyrillic,Arial; Verdana,tgk
+Tamil,tam,Tamil,NotoSansTamil-Regular,tam
+Telugu,tel,Telugu-Kannada,NotoSansKannada-Regular,tel
+Thai,tha,Thai,NotoSansThai-Regular; Verdana,tha
+Ukrainian,ukr,Cyrillic,Arial; Verdana,ukr
+Urdu,urd,Perso-Arabic,JameelNooriNastaleeq; NotoNastaliqUrdu-Regular,urd
+Vietnamese,vie,Latin,TimesNewRoman; Arial,vie
+Turkish,tur,Latin,TimesNewRoman; Arial,tur
+Uzbek,uzn,Latin,TimesNewRoman; Arial,uzb
+Wolof,wol,Latin,TimesNewRoman; Arial,afr
+Zulu,zul,Latin,TimesNewRoman; Arial,afr
+Arabic,arb,Arabic,NotoSansArabic-Regular; TraditionalArabic; Arial,ara
+Cebuano,ceb,Latin,TimesNewRoman; Arial,ceb
+Chinese_Simpl,cmn,Hant,Arial; Sim Sun; Yahei,chi_sim
+Fula,fuv,Latin,TimesNewRoman; Arial,afr
+Ganda,lug,Latin,TimesNewRoman; Arial,afr
+Icelandic,isl,Latin,TimesNewRoman; Arial,isl
+Lingala,lin,Latin,TimesNewRoman; Arial,afr
+Maori,mri,Latin,TimesNewRoman; Arial,mri
+Mongolian,khk,Cyrillic,Arial; Verdana,mon
+Nyanja,nya,Latin,TimesNewRoman; Arial,afr
+Romanian,ron,Latin,TimesNewRoman; Arial,ron
+Sorani_Kurdish,ckb,Arabic,TimesNewRoman; Arial,ara
+Shona,sna,Latin,TimesNewRoman; Arial,afr
+Umbundu,umb,Latin,TimesNewRoman; Arial,afr
+Swahili,swh,Latin,TimesNewRoman; Arial,swa
+Somali,som,Latin,TimesNewRoman; Arial,afr
+Swedish,swe,Latin,TimesNewRoman; Arial,swe
+Polish,pol,Latin,TimesNewRoman; Arial,pol
+Slovak,slk,Latin,TimesNewRoman; Arial,slk
+Slovenian,slv,Latin,TimesNewRoman; Arial,slv
+Oromo,gaz,Latin,TimesNewRoman; Arial,afr
+Portuguese_Portugal,por,Latin,TimesNewRoman; Arial,por
