@@ -84,6 +84,7 @@ def translate_files(args, dest_dir, input_files):
         --max-len-b {args.max_len_b} \
         --buffer-size {args.buffer_size} \
         --max-tokens {args.max_tokens} \
+        --skip-invalid-size-inputs-valid-test \
         --num-workers {args.cpu} > {{output_file}} && \
     echo "finished" >> {{output_file}}
     """
@@ -124,12 +125,12 @@ def main():
     args.cuda_visible_device_ids = args.cuda_visible_device_ids or list(range(torch.cuda.device_count()))
 
     chkpnt = torch.load(args.model)
-    model_args = chkpnt['args']
+    model_cfg = chkpnt['cfg']
     if args.source_lang is None or args.target_lang is None:
-        args.source_lang = args.source_lang or model_args.source_lang
-        args.target_lang = args.target_lang or model_args.target_lang
+        args.source_lang = args.source_lang or model_cfg['task']['source_lang']
+        args.target_lang = args.target_lang or model_cfg['task']['target_lang']
     if args.databin is None:
-        args.databin = args.databin or model_args.data
+        args.databin = args.databin or model_cfg['task']['data']
 
     root_dir = os.path.dirname(os.path.realpath(__file__))
     translation_dir = os.path.join(args.dest or root_dir, 'translations', f'{args.source_lang}-{args.target_lang}')

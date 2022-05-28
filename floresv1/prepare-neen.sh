@@ -34,7 +34,7 @@ ARCHIVES=(
 TRAIN_SETS=(
     "all-clean-ne/bible_dup.en-ne"
     "all-clean-ne/bible.en-ne"
-    "all-clean-ne/globalvoices.2018q4.ne-en"
+    "all-clean-ne/GlobalVoices.en-ne"
     "all-clean-ne/GNOMEKDEUbuntu.en-ne"
     "all-clean-ne/nepali-penn-treebank"
 )
