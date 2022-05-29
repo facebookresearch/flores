@@ -164,7 +164,7 @@ sacrebleu flores101_dataset/devtest/${TRG_LANG_CODE}.devtest < generation_${SRC_
 
 Language | FLORES-101 code | MM100 lang code
 ---|---|---
-Akrikaans | afr | af
+Afrikaans | afr | af
 Amharic | amh | am
 Arabic | ara | ar
 Armenian | hye | hy
