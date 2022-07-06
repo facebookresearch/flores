@@ -16,7 +16,7 @@
 * Evaluation server: [dynabench](https://dynabench.org/flores),
   [Instructions to submit model](./dynalab/README.md)
 
-Looking for FLORESv1, which included Nepali, Sinhala, Pashto, and Khmer? Click [here](floresv1/)
+Looking for the FLORESv1 release, which included Nepali, Sinhala, Pashto, and Khmer? Click [here](floresv1/)
 
 ## Learn More in This Intro Video
 [![Explain Like I’m 5: FLoRes](https://img.youtube.com/vi/mq3keaYhzag/0.jpg)](https://www.youtube.com/watch?v=mq3keaYhzag)
