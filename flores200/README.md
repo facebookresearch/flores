@@ -218,7 +218,7 @@ Rundi | run_Latn
 Russian | rus_Cyrl
 Sango | sag_Latn
 Sanskrit | san_Deva
-Santali | sat_Beng
+Santali | sat_Olck
 Sicilian | scn_Latn
 Shan | shn_Mymr
 Sinhala | sin_Sinh
