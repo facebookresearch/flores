@@ -22,6 +22,8 @@ FLORES-200 can be downloaded [here](https://tinyurl.com/flores200dataset) which 
 wget --trust-server-names https://tinyurl.com/flores200dataset
 ```
 
+It is also available on HuggingFace [here](https://huggingface.co/datasets/facebook/flores)
+
 ## SPM and Dictionary
 
 * Dictionary Download [here](https://tinyurl.com/nllb200dictionary)
