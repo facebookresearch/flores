@@ -112,9 +112,7 @@ pip install fairseq
 git clone https://github.com/facebookresearch/flores
 cd shared_task/dynalab
 ```
-#### 5. 
 
-###
 The simplest test is to run `python handler.py`.
 You'll need to update the `local_test` function to use the task you want.
 Then you can move to running more involved tests using Dynalab.
