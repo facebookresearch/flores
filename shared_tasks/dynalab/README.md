@@ -86,39 +86,35 @@ Note that the "signed" field will be obtained by calling `self.taskIO.sign_respo
 Also note that you can edit the [requirements.txt](./requirements.txt) file,
 based your model's specific dependencies.
 
-Once you've implemented the handler you'll need to test it locally.
-
-First install `dynalab` using instructions from their [repo](https://github.com/facebookresearch/dynalab#installation).
 ### Project installation and dependencies 
 
 #### 1. Create & activate virtual venv 
-```angular2html
+```
 python3 -m venv venv
 source venv/bin/activate
 ```
-#### 2. Install Dynalab
-```angular2html
+#### 2. Install Dynalab, fairseq & sentencepiece 
+```
 git clone https://github.com/facebookresearch/dynalab.git
 cd dynalab
 pip install -e .
-```
-#### 3. Install fairseq & sentencepiece 
-```angular2html
 pip install sentencepiece 
 pip install fairseq
 ```
-#### 4. Clone flores repo & put your model files inside the shared_task/dynalab folder
-```angular2html
+#### 3. Clone flores repo & put your model files inside the shared_task/dynalab folder
+you can get your model files from (https://dl.fbaipublicfiles.com/flores101/pretrained_models/flores101_mm100_175M.tar.gz) and extract the contents of the zip and put it in "shared_task/dynalab"
+```
 git clone https://github.com/facebookresearch/flores
 cd shared_task/dynalab
 ```
+Once you've implemented the handler you'll need to test it locally.
 
 The simplest test is to run `python handler.py`.
 You'll need to update the `local_test` function to use the task you want.
 Then you can move to running more involved tests using Dynalab.
 
 Afterwards, from this directory run:
-```angular2html
+```
 dynalab-cli init -n <name_of_your_model> --model-checkpoint <model.pt_file> -t <flores_task_code> --model-files <your_comma_seperated_model_files>
 
 example:
@@ -127,7 +123,7 @@ dynalab-cli init -n asimafrican --model-checkpoint model.pt -t flores_african --
 ```
 Note that the model name needs to be lower-kebab-case.
 
-Chose the track you want to apply to: "flores_small1", "flores_small2", "flores_full" or "flores_african"
+Chose the track you want to apply to: "flores_african"
 Note that the input format is same for all the tracks.
 Then follow the prompt instruction and point to your model path, handler path ...
 

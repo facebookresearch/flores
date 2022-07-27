@@ -1,5 +1,5 @@
 {
-    "task": "flores_small1",
+    "task": "flores_african",
     "checkpoint": "model.pt",
     "handler": "handler.py",
     "requirements": true,

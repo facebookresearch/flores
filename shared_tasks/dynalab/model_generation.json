@@ -7,19 +7,6 @@
         "min_len": 1,
         "unk_penalty": 100.0
     },
-    "directions":
-    [
-        "eng-hau",
-        "eng-isl",
-        "eng-jpn",
-        "eng-ces",
-        "eng-rus",
-        "eng-zho_simp",
-        "eng-deu",
-        "eng-oci",
-        "eng-lug",
-        "eng-zul",
-        "eng-ibo"
-    ],
     "sentencepiece": "wiki.spm"
 }
+

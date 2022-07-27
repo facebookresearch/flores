@@ -26,12 +26,28 @@ logger.setLevel(logging.INFO)
 # Tell Torchserve to let us do the deserialization
 os.environ["TS_DECODE_INPUT_REQUEST"] = "false"
 
+def mapping(languages: str) -> dict:
+    return dict(
+        tuple(pair.split(":"))
+        for pair in languages.strip().replace("\n", "").split(",")
+    )
 
-def mt_postprocess(input, lang):
-    if lang == "zho_simp":
-        return zh_postprocess(input)
-    return input
 
+ISO2M100 = mapping(
+    """
+afr:af,amh:am,ara:ar,asm:as,ast:ast,azj:az,bel:be,ben:bn,bos:bs,bul:bg,
+cat:ca,ceb:ceb,ces:cs,ckb:ku,cym:cy,dan:da,deu:de,ell:el,eng:en,est:et,
+fas:fa,fin:fi,fra:fr,ful:ff,gle:ga,glg:gl,guj:gu,hau:ha,heb:he,hin:hi,
+hrv:hr,hun:hu,hye:hy,ibo:ig,ind:id,isl:is,ita:it,jav:jv,jpn:ja,kam:kam,
+kan:kn,kat:ka,kaz:kk,kea:kea,khm:km,kir:ky,kor:ko,lao:lo,lav:lv,lin:ln,
+lit:lt,ltz:lb,lug:lg,luo:luo,mal:ml,mar:mr,mkd:mk,mlt:mt,mon:mn,mri:mi,
+msa:ms,mya:my,nld:nl,nob:no,npi:ne,nso:ns,nya:ny,oci:oc,orm:om,ory:or,
+pan:pa,pol:pl,por:pt,pus:ps,ron:ro,rus:ru,slk:sk,slv:sl,sna:sn,snd:sd,
+som:so,spa:es,srp:sr,swe:sv,swh:sw,tam:ta,tel:te,tgk:tg,tgl:tl,tha:th,
+tur:tr,ukr:uk,umb:umb,urd:ur,uzb:uz,vie:vi,wol:wo,xho:xh,yor:yo,zho_simp:zh,
+zho_trad:zh,zul:zu,fuv:ff
+"""
+)
 
 QUOTES = re.compile(r'"|,,|\'\'|``|‟|“|”')
 HYPHEN = re.compile(r" -\s*- ")
@@ -44,7 +60,7 @@ PUNCT = re.compile(r"\s([\.)”。])")
 PUNCT2 = re.compile(r"([(“])\s")
 COMMA1 = re.compile(r"(\D),")
 COMMA2 = re.compile(r",(\D)")
-# Don't replace multiple dots 
+# Don't replace multiple dots
 DOT = re.compile(r"(?<!\.)\.(?![\d\.])")
 # Don't replace ':' that were part of Latin word/number
 COLON = re.compile(r":(?![\da-zA-Z])")
@@ -75,17 +91,6 @@ def zh_postprocess(input):
     input = input.replace(")", "）")
 
     return input.strip()
-
-
-def test_chinese_colon(*_):
-    # en_source = "The molar ratio of E:S:M in the lipid bilayer is approximately 1:20:300."
-    zh_reference = "脂质双分子层中 E:S:M 的摩尔比约为 1:20:300。"
-    zh_translated = "脂质双分子层中E:S:M的摩尔比约为1:20:300."
-    assert zh_translated != zh_reference
-    zh_fixed = zh_postprocess(zh_translated)
-    assert "E:S:M" in zh_fixed
-    assert "1:20:300" in zh_fixed
-    assert zh_fixed == zh_reference
 
 
 class FakeGenerator:
@@ -121,8 +126,6 @@ class Handler(BaseDynaHandler):
         config = json.loads(
             (Path(model_file_dir) / "model_generation.json").read_text()
         )
-        directions = config.get("directions")
-        self.supported_directions = set(directions) if directions else None
 
         translation_cfg = TranslationConfig()
         self.vocab = TranslationTask.load_dictionary(
@@ -155,12 +158,12 @@ class Handler(BaseDynaHandler):
                 [model], tgt_dict=self.vocab, **config["generation"]
             )
 
-        self.taskIO = TaskIO("flores_small2")
+        self.taskIO = TaskIO("flores_african")
         self.initialized = True
 
     def lang_token(self, lang: str) -> int:
         """Converts the ISO 639-3 language code to MM100 language codes."""
-        simple_lang = "zho_Hans" if lang == "zho_simp" else lang
+        simple_lang = ISO2M100[lang]
         token = self.vocab.index(f"__{simple_lang}__")
         assert token != self.vocab.unk(), f"Unknown language '{lang}' ({simple_lang})"
         return token
@@ -175,10 +178,10 @@ class Handler(BaseDynaHandler):
         preprocess data into a format that the model can do inference on
         """
         tokens = self.tokenize(sample["sourceText"])
-        # src_token = self.lang_token(sample["sourceLanguage"])
+        src_token = self.lang_token(sample["sourceLanguage"])
         tgt_token = self.lang_token(sample["targetLanguage"])
         return {
-            "src_tokens": [tgt_token] + tokens + [self.vocab.eos()],
+            "src_tokens": [src_token] + tokens + [self.vocab.eos()],
             "src_length": len(tokens) + 1,
             "tgt_token": tgt_token,
         }
@@ -236,7 +239,7 @@ class Handler(BaseDynaHandler):
         responses = [
             {
                 "id": sample["uid"],
-                "translatedText": mt_postprocess(translation, sample["targetLanguage"]),
+                "translatedText": translation,
             }
             for translation, sample in zip(translations, samples)
         ]
@@ -246,11 +249,7 @@ class Handler(BaseDynaHandler):
         return responses
 
     def accepts(self, sample) -> bool:
-        if not self.supported_directions:
-            return True
-
-        direction = "-".join((sample["sourceLanguage"], sample["targetLanguage"]))
-        return direction in self.supported_directions
+        return sample["sourceLanguage"] in ISO2M100 and sample["targetLanguage"] in ISO2M100
 
     def ignore_sample(self, sample) -> dict:
         r = {"id": sample["uid"], "translatedText": ""}
@@ -413,38 +412,6 @@ def local_test():
         if k.startswith("test_") and callable(testcase):
             logger.info(f"[TESTCASE] {k}")
             testcase(ctx)
-
-
-def test_no_unk(ctx):
-    en_src = "a gazetteer compiled by Chang Qu (常璩) during the Western Jin Dynasty"
-    isl_ref = "lögbók sem Chang Qu (常璩) tók saman á tímum Vestur-Jin-keisaraættarinnar"
-    isl_translated = ctx._call_handler(mk_sample(en_src, "isl"))
-    assert "<unk>" not in isl_translated
-    # 璩 is really not part of the dict so we can't generate it.
-    # assert "(常璩)" in isl_translated
-    # assert isl_ref == isl_translated
-
-
-def test_batching(ctx):
-    JAZZ = """
-Jazz is a music genre that originated in the African-American communities of New Orleans, Louisiana, United States, in the late 19th and early 20th centuries, with its roots in blues and ragtime.
-Since the 1920s Jazz Age, it has been recognized as a major form of musical expression in traditional and popular music, linked by the common bonds of African-American and European-American musical parentage.
-Jazz is characterized by swing and blue notes, complex chords, call and response vocals, polyrhythms and improvisation.
-Jazz has roots in West African cultural and musical expression, and in African-American music traditions.
-""".strip().splitlines()
-    mock_data = [
-        mk_sample(line, lang, i)
-        for lang in ["oci", "lug", "zul", "ibo", "zho_simp", "isl", "hau"]
-        for i, line in enumerate(JAZZ)
-    ]
-
-    batch_responses = ctx._call_handler(mock_data)
-    print("==== batch ====")
-    print("\n".join(batch_responses))
-    single_responses = [ctx._call_handler(d) for d in mock_data]
-    print("==== one by one ====")
-    print("\n".join(single_responses))
-    assert batch_responses == single_responses
 
 
 if __name__ == "__main__":
