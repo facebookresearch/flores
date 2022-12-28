@@ -239,3 +239,11 @@ zho_Hant    | Chinese (Traditional)
 zsm_Latn    | Standard Malay
 zul_Latn    | Zulu
 
+## Latest Update
+Date: 2022-12-14
+Files:
+BCP 47 Code | Language
+----------- | ----------------------------------
+est_Latn    | Estonian
+fra_Latn    | French
+nld_Latn    | Dutch
