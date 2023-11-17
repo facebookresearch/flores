@@ -6,11 +6,11 @@ NLLB Seed is a set of professionally-translated sentences in the Wikipedia domai
 
 ## Download
 
-NLLB-Seed can be downloaded [here](https://tinyurl.com/NLLBSeed) which you can download with the following command:
+⚠️ This repository is no longer being updated ⚠️
 
-```bash
-wget --trust-server-names https://tinyurl.com/NLLBSeed
-```
+**For newer versions of this dataset**, see <https://github.com/openlanguagedata/seed> and <https://www.oldi.org>.
+
+The original version of the dataset can still be downloaded [here](https://tinyurl.com/NLLBSeed).
 
 ## Languages in NLLB - Seed
 
