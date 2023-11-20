@@ -1,6 +1,13 @@
 # FLORES-200 and NLLB Professionally Translated Datasets: NLLB-Seed, NLLB-MD, and Toxicity-200
 
-Quick-access to READMEs: 
+
+⚠️ This repository is no longer being updated ⚠️
+
+**Newer versions** of the FLORES and NLLB-Seed datasets managed by the [Open Language Data Initiative](https://www.oldi.org/) are available here:
+* [FLORES](https://github.com/openlanguagedata/flores)
+* [NLLB-Seed](https://github.com/openlanguagedata/seed)
+
+Quick-access to the original READMEs: 
 * [FLORES-200](flores200/README.md)
 * [NLLB-Seed](nllb_seed/README.md)
 * [NLLB-MD](nllb_md/README.md)

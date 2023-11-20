@@ -12,17 +12,15 @@ The creation of FLORES-200 doubles the existing language coverage of FLORES-101.
 
 ## Composition
 FLORES-200 consists of translations from 842 distinct web articles, totaling
-3001 sentences. These sentences are divided into three splits: dev, devtest, and test (hidden). On average, sentences are approximately 21 words long. 
+3001 sentences. These sentences are divided into three splits: dev, devtest, and test (hidden). On average, sentences are approximately 21 words long.
 
 ## Download
 
-FLORES-200 can be downloaded [here](https://tinyurl.com/flores200dataset) which you can download with the following command:
+⚠️ This repository is no longer being updated ⚠️
 
-```bash
-wget --trust-server-names https://tinyurl.com/flores200dataset
-```
+**For newer versions of this dataset**, see <https://github.com/openlanguagedata/flores> and <https://www.oldi.org>.
 
-It is also available on HuggingFace [here](https://huggingface.co/datasets/facebook/flores)
+The original version of the dataset can still be downloaded [here](https://tinyurl.com/flores200dataset) and is also available on HuggingFace [here](https://huggingface.co/datasets/facebook/flores).
 
 ## SPM and Dictionary
 
