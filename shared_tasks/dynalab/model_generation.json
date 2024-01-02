@@ -1,7 +1,12 @@
 {
     "dummy": false,
-    "beam_size": 1,
-    "max_len_a": 1.3,
-    "max_len_b": 5,
-    "min_len": 5
+    "generation": {
+        "beam_size": 1,
+        "max_len_a": 3,
+        "max_len_b": 5,
+        "min_len": 1,
+        "unk_penalty": 100.0
+    },
+    "sentencepiece": "wiki.spm"
 }
+
